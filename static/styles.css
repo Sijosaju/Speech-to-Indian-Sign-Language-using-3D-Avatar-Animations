@@ -1,8 +1,37 @@
-/* Original styles preserved */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+}
+
 .container {
-  max-width: 800px;
+  display: flex;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  gap: 20px;
+}
+
+.left-panel {
+  flex: 1;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.right-panel {
+  flex: 1;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .section {
@@ -22,6 +51,7 @@
   margin: 10px 0;
   padding: 10px;
   font-size: 16px;
+  resize: vertical;
 }
 
 .btn {
@@ -33,6 +63,7 @@
   border: none;
   border-radius: 4px;
   transition: background-color 0.3s;
+  margin-right: 10px;
 }
 
 .btn:hover {
@@ -44,7 +75,14 @@
   cursor: not-allowed;
 }
 
-/* Enhanced ISL word styling with semantic coloring */
+.btn-clear {
+  background-color: #ff4444;
+}
+
+.btn-clear:hover {
+  background-color: #cc0000;
+}
+
 .isl-word {
   display: inline-block;
   margin: 0 5px;
@@ -56,29 +94,28 @@
   letter-spacing: 0.5px;
 }
 
-/* Semantic coloring for different parts of speech */
 .isl-subject {
-  background-color: #c8e6c9; /* Light green for subjects */
+  background-color: #c8e6c9;
   border-left: 3px solid #4caf50;
 }
 
 .isl-object {
-  background-color: #bbdefb; /* Light blue for objects */
+  background-color: #bbdefb;
   border-left: 3px solid #2196f3;
 }
 
 .isl-verb {
-  background-color: #ffecb3; /* Light amber for verbs */
+  background-color: #ffecb3;
   border-left: 3px solid #ffc107;
 }
 
 .isl-time-question {
-  background-color: #e1bee7; /* Light purple for time/question words */
+  background-color: #e1bee7;
   border-left: 3px solid #9c27b0;
 }
 
 .isl-negation {
-  background-color: #ffcdd2; /* Light red for negation */
+  background-color: #ffcdd2;
   border-left: 3px solid #f44336;
   font-weight: bold;
 }
@@ -92,6 +129,17 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+#signLanguageAnimation {
+  width: 100%;
+  height: 400px;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px dashed #999;
+  border-radius: 8px;
+}
+
 .sentence-divider {
   display: inline-block;
   margin: 0 15px;
@@ -102,30 +150,13 @@
 
 h1, h2 {
   color: #333;
+  margin-bottom: 15px;
 }
 
-/* ISL grammar explanation panel */
-.isl-legend {
-  margin-top: 20px;
-  padding: 15px;
-  background: #f9f9f9;
-  border-radius: 4px;
-  border-left: 4px solid #2196f3;
-  font-size: 0.9em;
-}
-
-.legend-title {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.btn-clear {
-  background-color: #ff4444;
-  margin-left: 10px;
-}
-
-.btn-clear:hover {
-  background-color: #cc0000;
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
 }
 
   

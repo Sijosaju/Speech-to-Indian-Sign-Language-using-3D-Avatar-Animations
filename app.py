@@ -36,11 +36,14 @@ def preprocess_text(text):
     """Enhanced preprocessing for ISL conversion with time format preservation."""
     text = text.lower().strip()
 
-    # Keep colons (for time expressions like 12:00)
-    text = re.sub(r'[^\w\s:]', '', text)
+    # Convert time format
+    text = re.sub(r'\b(\d{1,2}):00\b', r'\1', text)  # Remove ':00'
+    text = re.sub(r'\b(\d{1,2}):(\d{1,2})\b', r'\1 \2', text)  # Replace ':' with space
+
+    # Remove all other non-alphanumeric characters except spaces
+    text = re.sub(r'[^\w\s]', '', text)
 
     return text
-
 
 def extract_isl_structure_spacy(text):
     """
@@ -52,11 +55,11 @@ def extract_isl_structure_spacy(text):
     tense_marker = ""
 
     # List of direction-related words that should not be lemmatized
-    direction_words = {"left", "right", "back", "straight", "forward", "up", "down"}
+    keep_words = {"left", "right", "back", "straight", "forward", "up", "down", "near", "next", "beside", "in", "on", "under"}
 
     for token in doc:
         # Preserve direction words as they are
-        if token.text.lower() in direction_words:
+        if token.text.lower() in keep_words:
             important_words.append(token.text.lower())
             continue
 
@@ -117,6 +120,7 @@ def save_text():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
 
 

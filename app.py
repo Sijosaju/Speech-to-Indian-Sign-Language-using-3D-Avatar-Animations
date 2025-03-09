@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import nltk
 from nltk.tokenize import word_tokenize
+from nltk.tokenize.treebank import TreebankWordDetokenizer
 import logging
 import spacy
 import string
@@ -32,11 +33,39 @@ except Exception as e:
 app = Flask(__name__, template_folder="templates")
 CORS(app)
 
-def preprocess_text(text):
-    """Enhanced preprocessing for ISL conversion with time format preservation."""
-    text = text.lower().strip()
+# Dictionary for common English contractions
+CONTRACTIONS = {
+    "i'm": "i am", "you're": "you are", "he's": "he is", "she's": "she is",
+    "it's": "it is", "we're": "we are", "they're": "they are",
+    "i've": "i have", "you've": "you have", "we've": "we have", "they've": "they have",
+    "i'll": "i will", "you'll": "you will", "he'll": "he will", "she'll": "she will",
+    "we'll": "we will", "they'll": "they will", "it'll": "it will",
+    "isn't": "is not", "aren't": "are not", "wasn't": "was not", "weren't": "were not",
+    "haven't": "have not", "hasn't": "has not", "hadn't": "had not",
+    "won't": "will not", "wouldn't": "would not", "don't": "do not", "doesn't": "does not",
+    "didn't": "did not", "can't": "cannot", "couldn't": "could not", "shouldn't": "should not",
+    "mightn't": "might not", "mustn't": "must not"
+}
 
-    # Convert time format
+def expand_contractions(text):
+    """Expands contractions in the given text while preserving capitalization."""
+    contractions_pattern = re.compile(r'\b(' + '|'.join(re.escape(k) for k in CONTRACTIONS.keys()) + r')\b', re.IGNORECASE)
+    
+    def replace(match):
+        word = match.group(0).lower()  # Match word case-insensitively
+        expanded = CONTRACTIONS.get(word, word)  # Get expanded version
+        return expanded.capitalize() if match.group(0)[0].isupper() else expanded  # Preserve capitalization
+
+    return contractions_pattern.sub(replace, text)
+
+def preprocess_text(text):
+    """Enhanced preprocessing for ISL conversion with contraction handling and time format preservation."""
+    text = text.lower().strip()
+    
+    # Expand contractions
+    text = expand_contractions(text)
+
+    # Convert time format (e.g., "10:30" → "10 30", "7:00" → "7")
     text = re.sub(r'\b(\d{1,2}):00\b', r'\1', text)  # Remove ':00'
     text = re.sub(r'\b(\d{1,2}):(\d{1,2})\b', r'\1 \2', text)  # Replace ':' with space
 
@@ -76,7 +105,6 @@ def extract_isl_structure_spacy(text):
             tense_marker = "PAST"
             important_words.append(token.lemma_)
         elif token.tag_ in ["VBG", "VBZ", "VBP"]:  # Present continuous/simple present
-            tense_marker = "NOW"
             important_words.append(token.lemma_)
         else:
             important_words.append(token.lemma_)
@@ -120,6 +148,8 @@ def save_text():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
 
 
 

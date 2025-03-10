@@ -84,7 +84,7 @@ def extract_isl_structure_spacy(text):
     tense_marker = ""
 
     # List of direction-related words that should not be lemmatized
-    keep_words = {"left", "right", "back", "straight", "forward", "up", "down", "near", "next", "beside", "in", "on", "under"}
+    keep_words = {"left", "right", "back", "straight", "forward", "up", "down", "near", "next", "beside", "in", "on", "under","from","to"}
 
     for token in doc:
         # Preserve direction words as they are

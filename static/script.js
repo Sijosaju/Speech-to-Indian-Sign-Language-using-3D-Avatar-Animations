@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const micButton = document.getElementById('micButton');
   const transcript = document.getElementById('transcript');
   const islBox = document.getElementById('islBox');
+  const animationContainer = document.getElementById('animationContainer'); // Animation container
   
   let recognition;
   let isRecording = false;
@@ -112,6 +113,118 @@ document.addEventListener('DOMContentLoaded', () => {
     return negationWords.includes(word.toLowerCase());
   }
   
+  // Function to display animations sequentially
+  async function displayAnimationsSequentially(words) {
+    animationContainer.innerHTML = ''; // Clear previous animations
+
+    for (const word of words) {
+      const animationFile = `static/animations/${word}.mp4`; // Path to word animation file
+
+      // Check if the word animation exists
+      const response = await fetch(animationFile);
+      if (response.ok) {
+        // Word animation exists, display it
+        const videoElement = document.createElement('video');
+        videoElement.src = animationFile;
+        videoElement.autoplay = true;
+        videoElement.controls = false;
+        videoElement.classList.add('animation-video');
+
+        // Create a container for the video and its name
+        const animationWrapper = document.createElement('div');
+        animationWrapper.classList.add('animation-wrapper');
+
+        // Add the video element
+        animationWrapper.appendChild(videoElement);
+
+        // Add the video name below the video
+        const videoName = document.createElement('div');
+        videoName.textContent = word; // Display the word name
+        videoName.classList.add('video-name');
+        animationWrapper.appendChild(videoName);
+
+        // Clear previous animation and display the new one
+        animationContainer.innerHTML = '';
+        animationContainer.appendChild(animationWrapper);
+
+        // Wait for the video to finish playing
+        await new Promise((resolve) => {
+          videoElement.onended = resolve;
+        });
+      } else {
+        // Word animation does not exist, fall back to letter animations
+        await displayLetterAnimationsSequentially(word);
+      }
+    }
+  }
+
+  // Function to display letter animations sequentially for a word
+  async function displayLetterAnimationsSequentially(word) {
+    const letters = word.split(''); // Split the word into individual letters
+
+    for (const letter of letters) {
+      const letterAnimationFile = `static/animations/${letter}.mp4`; // Path to letter animation file
+
+      // Check if the letter animation exists
+      const response = await fetch(letterAnimationFile);
+      if (response.ok) {
+        // Letter animation exists, display it
+        const videoElement = document.createElement('video');
+        videoElement.src = letterAnimationFile;
+        videoElement.autoplay = true;
+        videoElement.controls = false;
+        videoElement.classList.add('animation-video');
+
+        // Create a container for the video and its name
+        const animationWrapper = document.createElement('div');
+        animationWrapper.classList.add('animation-wrapper');
+
+        // Add the video element
+        animationWrapper.appendChild(videoElement);
+
+        // Add the video name below the video
+        const videoName = document.createElement('div');
+        videoName.textContent = letter; // Display the letter name
+        videoName.classList.add('video-name');
+        animationWrapper.appendChild(videoName);
+
+        // Clear previous animation and display the new one
+        animationContainer.innerHTML = '';
+        animationContainer.appendChild(animationWrapper);
+
+        // Wait for the video to finish playing
+        await new Promise((resolve) => {
+          videoElement.onended = resolve;
+        });
+      } else {
+        // Letter animation does not exist, display a placeholder
+        const placeholder = document.createElement('div');
+        placeholder.textContent = letter;
+        placeholder.classList.add('animation-placeholder');
+
+        // Create a container for the placeholder and its name
+        const animationWrapper = document.createElement('div');
+        animationWrapper.classList.add('animation-wrapper');
+
+        // Add the placeholder
+        animationWrapper.appendChild(placeholder);
+
+        // Add the placeholder name below the placeholder
+        const videoName = document.createElement('div');
+        videoName.textContent = letter; // Display the letter name
+        videoName.classList.add('video-name');
+        animationWrapper.appendChild(videoName);
+
+        // Clear previous animation and display the new one
+        animationContainer.innerHTML = '';
+        animationContainer.appendChild(animationWrapper);
+
+        // Wait for a short delay before showing the next letter
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
+      }
+    }
+  }
+  
   function sendTextForProcessing(text) {
     fetch("http://127.0.0.1:5000/save_text", {
       method: "POST",
@@ -122,6 +235,10 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => {
       islBox.innerHTML = formatISLStructure(data.isl_structure);
       console.log("Text received from server:", data.original_text);
+      
+      // Map animations based on ISL grammar
+      const words = data.isl_structure.split(' ').filter(word => word.trim());
+      displayAnimationsSequentially(words);
     })
     .catch(error => {
       console.error("Error processing text:", error);
@@ -139,19 +256,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (recognition) {
       recognition.stop();
       isRecording = false;
-      micButton.textContent = "🎤 Start Recording";
-      micButton.style.backgroundColor = "#4CAF50";
-      
-      // Clear the transcript and ISL box
-     // transcript.value = "";
-      //islBox.innerHTML = "";
+      micButton.innerHTML = '<i data-feather="mic"></i><span>Start Recording</span>';
+      micButton.classList.remove('success', 'danger'); // Remove any conflicting classes
+      micButton.classList.add('primary'); // Ensure the button is blue
+      feather.replace(); // Re-render Feather icons
     }
   }
 
   document.getElementById("clearButton").addEventListener("click", () => {
     transcript.value = "";
     islBox.innerHTML = "";
-  
+    animationContainer.innerHTML = ""; // Clear animations
+    
     // Send request to backend to clear stored text
     fetch("http://127.0.0.1:5000/clear_text", {
       method: "POST",
@@ -166,24 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
-  
   micButton.addEventListener("click", () => {
     isRecording ? stopRecording() : startRecording();
   });
 });
-  
-
-  
-  
-  
-  
-
-
-
-
-
-
-
-
-
-

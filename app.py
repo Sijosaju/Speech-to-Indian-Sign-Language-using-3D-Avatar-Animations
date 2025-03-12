@@ -5,7 +5,6 @@ from nltk.tokenize import word_tokenize
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 import logging
 import spacy
-import string
 import re
 
 # Setup logging
@@ -118,6 +117,15 @@ def extract_isl_structure_spacy(text):
 @app.route('/')
 def index():
     return render_template('index.html')
+    
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
+
 
 @app.route('/save_text', methods=['POST'])
 def save_text():
@@ -148,58 +156,3 @@ def save_text():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

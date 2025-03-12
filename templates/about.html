@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - Speech to ISL Translator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="logo">
+        <span class="logo-icon"></span>
+        <span class="logo-text">ISL Translator</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="{{ url_for('index') }}" class="nav-item">
+          <i data-feather="mic"></i>
+          <span>Translate</span>
+        </a>
+        <a href="{{ url_for('about') }}" class="nav-item active">
+          <i data-feather="info"></i>
+          <span>About</span>
+        </a>
+        <a href="{{ url_for('contact') }}" class="nav-item">
+            <i data-feather="mail"></i>
+            <span>Contact</span>
+          </a>
+      </nav>
+      <div class="theme-toggle">
+        <i data-feather="moon"></i>
+        <span>Dark Mode</span>
+      </div>
+    </div>
+
+    <main class="content">
+      <header class="content-header">
+        <h1>About Speech to ISL Translator</h1>
+        <p class="subtitle">Learn more about our mission and features</p>
+      </header>
+
+      <!-- About Section -->
+      <div class="about-section">
+        <h2>About Speech to ISL Translator</h2>
+        <p>
+          The Speech to Indian Sign Language (ISL) Translator is a cutting-edge tool designed to bridge the communication gap between spoken language and Indian Sign Language. It leverages advanced speech recognition and animation technologies to provide real-time translation, making communication more accessible for the deaf and hard-of-hearing community.
+        </p>
+        <h3>Features</h3>
+        <ul>
+          <li>Real-time speech-to-text transcription.</li>
+          <li>Accurate ISL grammar translation.</li>
+          <li>Interactive sign language animations.</li>
+          <li>User-friendly interface with dark mode support.</li>
+        </ul>
+        <h3>How It Works</h3>
+        <p>
+          Simply click the "Start Recording" button to begin. The tool will transcribe your speech into text, convert it into ISL grammar, and display the corresponding sign language animation.
+        </p>
+        <h3>Our Mission</h3>
+        <p>
+          Our mission is to create inclusive technology that empowers individuals with hearing impairments to communicate effectively and independently.
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      feather.replace();
+      
+      // Theme toggle functionality
+      const themeToggle = document.querySelector('.theme-toggle');
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+      });
+    });
+  </script>
+</body>
+</html>

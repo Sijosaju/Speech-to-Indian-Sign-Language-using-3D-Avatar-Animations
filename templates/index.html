@@ -1,63 +1,99 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Speech to ISL Translator</title>
-  <link rel="stylesheet" href="static/styles.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="left-panel">
-      <h1>Speech to ISL Translator</h1>
-      <div>
-        <button id="micButton" class="btn">🎤 Start Recording</button>
-        <button id="clearButton" class="btn btn-clear">🗑 Clear</button>
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="logo">
+        <span class="logo-icon"></span>
+        <span class="logo-text">ISL Translator</span>
       </div>
-      
-      <div class="section">
-        <h2>Transcript (Live):</h2>
-        <textarea id="transcript" readonly></textarea>
-      </div>
-      
-      <div class="section">
-        <h2>Live ISL Grammar:</h2>
-        <div id="islBox" class="box"></div>
+      <nav class="nav-menu">
+        <a href="{{ url_for('index') }}" class="nav-item active">
+          <i data-feather="mic"></i>
+          <span>Translate</span>
+        </a>
+        <a href="{{ url_for('about') }}" class="nav-item">
+          <i data-feather="info"></i>
+          <span>About</span>
+        </a>
+        <a href="{{ url_for('contact') }}" class="nav-item">
+          <i data-feather="mail"></i>
+          <span>Contact</span>
+        </a>
+      </nav>
+      <div class="theme-toggle">
+        <i data-feather="moon"></i>
+        <span>Dark Mode</span>
       </div>
     </div>
 
-    <div class="right-panel">
-      <h2>Sign Language Animation</h2>
-      <div id="signLanguageAnimation">
-        <p>Animation will be displayed here</p>
+    <main class="content">
+      <header class="content-header">
+        <h1>Speech to Indian Sign Language Translator</h1>
+        <p class="subtitle">Translate spoken language to ISL in real-time</p>
+      </header>
+
+      <div class="workspace">
+        <div class="input-panel">
+          <div class="panel-header">
+            <h2>Speech Input</h2>
+            <div class="controls">
+              <button id="micButton" class="btn primary">
+                <i data-feather="mic"></i>
+                <span>Start Recording</span>
+              </button>
+              <button id="clearButton" class="btn secondary">
+                <i data-feather="trash-2"></i>
+                <span>Clear</span>
+              </button>
+            </div>
+          </div>
+          <div class="transcript-container">
+            <textarea id="transcript" readonly placeholder="Your transcribed text will appear here..."></textarea>
+          </div>
+        </div>
+
+        <div class="output-panel">
+          <div class="grammar-section">
+            <h2>ISL Grammar</h2>
+            <div id="islBox" class="result-box"></div>
+          </div>
+          
+          <div class="animation-section">
+            <h2>Sign Language Animation</h2>
+            <div id="animationContainer" class="animation-container">
+              <div class="placeholder-animation">
+                <i data-feather="video"></i>
+                <p>Animation will appear here</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
-  
-  <script src="static/script.js"></script>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      feather.replace();
+      
+      // Theme toggle functionality
+      const themeToggle = document.querySelector('.theme-toggle');
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+      });
+    });
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  

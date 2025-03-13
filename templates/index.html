@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +19,10 @@
         <a href="{{ url_for('index') }}" class="nav-item active">
           <i data-feather="mic"></i>
           <span>Translate</span>
+        </a>
+        <a href="#" id="history-button" class="nav-item">
+          <i data-feather="clock"></i>
+          <span>History</span>
         </a>
         <a href="{{ url_for('about') }}" class="nav-item">
           <i data-feather="info"></i>
@@ -81,6 +83,18 @@
         </div>
       </div>
     </main>
+
+    <!-- History Panel -->
+    <div id="history-panel" class="history-panel">
+      <div class="history-header">
+        <h3>Conversion History</h3>
+        <button id="clearHistoryButton">Clear All</button>
+        <button id="close-history" class="btn icon-btn">
+          <i data-feather="x"></i>
+        </button>
+      </div>
+      <div id="history-list" class="history-list"></div>
+    </div>
   </div>
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>

@@ -566,3 +566,123 @@ textarea:focus {
     padding: 0.75rem;
   }
 }
+
+
+
+
+
+/* History Panel Styles */
+.history-panel {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100%;
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-lg);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.history-panel.show {
+  right: 0;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.history-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.history-item {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.history-item:hover {
+  transform: translateX(5px);
+}
+
+.history-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.history-query {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  word-break: break-word;
+}
+
+.delete-history {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.empty-history {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 2rem;
+}
+
+/* Dark Mode History Panel */
+.dark-mode .history-panel {
+  background: var(--gray-900);
+  border-left: 1px solid var(--gray-800);
+}
+
+.dark-mode .history-item {
+  background: var(--gray-800);
+}
+
+#clearHistoryButton {
+  width: 4rem;
+  height: 3rem;
+  padding: 0.5rem;
+  background-color: var(--danger);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition), transform var(--transition);
+}
+#clearHistoryButton:hover {
+  background-color: var(--danger);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+

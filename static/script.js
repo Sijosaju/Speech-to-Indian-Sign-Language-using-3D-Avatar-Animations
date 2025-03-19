@@ -22,35 +22,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // History Functions
   function saveToHistory(originalText, islText) {
-    const history = JSON.parse(localStorage.getItem('conversionHistory')) || [];
-    history.unshift({
-      id: Date.now(),
-      text: originalText,
-      isl: islText,
-      timestamp: new Date().toISOString()
+    fetch("/save_history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ original_text: originalText, isl_text: islText })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        console.error("History save error:", data.error);
+      }
+    })
+    .catch(error => {
+      console.error("Error saving history:", error);
     });
-    localStorage.setItem('conversionHistory', JSON.stringify(history.slice(0, 100))); // Keep last 100 items
   }
+  
 
-  function displayHistory() {
-    const history = JSON.parse(localStorage.getItem('conversionHistory')) || [];
-    const historyList = document.getElementById('history-list');
-    
-    historyList.innerHTML = history.length > 0 
-      ? history.map(item => `
-          <div class="history-item" data-id="${item.id}">
-            <button class="delete-btn" data-id="${item.id}">
-              <i data-feather="trash-2"></i>
-            </button>
-            <div class="history-time">${new Date(item.timestamp).toLocaleString()}</div>
-            <div class="history-query">${item.text}</div>
-            <div class="history-isl">${item.isl}</div>
-          </div>
-        `).join('')
-      : '<div class="empty-history">No conversions yet</div>';
-    
-    feather.replace();
-  }
+ // Modify the displayHistory function
+function displayHistory() {
+  fetch("/get_history")
+    .then(response => response.json())
+    .then(data => {
+      const historyList = document.getElementById('history-list');
+      if (data.error) {
+        historyList.innerHTML = `<div class="error">${data.error}</div>`;
+        return;
+      }
+      
+      historyList.innerHTML = data.length > 0 
+        ? data.map(entry => `
+            <div class="history-item" data-id="${entry._id}">
+              <button class="delete-btn" data-id="${entry._id}">
+                <i data-feather="trash-2"></i>
+              </button>
+              <div class="history-time">${new Date(entry.timestamp).toLocaleString()}</div>
+              <div class="history-query">${entry.original_text}</div>
+              <div class="history-isl">${entry.isl_text}</div>
+            </div>
+          `).join('')
+        : '<div class="empty-history">No conversions yet</div>';
+      feather.replace();
+    })
+    .catch(error => {
+      console.error("History fetch error:", error);
+      historyList.innerHTML = '<div class="error">Error loading history</div>';
+    });
+}
 
   // History Event Listeners
   document.getElementById('history-button').addEventListener('click', () => {
@@ -64,18 +82,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('history-list').addEventListener('click', (e) => {
     if (e.target.closest('.delete-btn')) {
-      const id = Number(e.target.closest('.delete-btn').dataset.id);
-      let history = JSON.parse(localStorage.getItem('conversionHistory'));
-      history = history.filter(item => item.id !== id);
-      localStorage.setItem('conversionHistory', JSON.stringify(history));
-      displayHistory();
+      const id = e.target.closest('.delete-btn').dataset.id;
+      if (confirm("Are you sure you want to delete this entry?")) {
+        fetch(`/delete_history/${id}`, {
+          method: "DELETE"
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            displayHistory();
+          }
+        })
+        .catch(error => {
+          console.error("Delete error:", error);
+          alert("Could not delete entry.");
+        });
+      }
     }
   });
 
   document.getElementById('clearHistoryButton').addEventListener('click', () => {
     if (confirm("Are you sure you want to clear all conversion history?")) {
-      localStorage.removeItem('conversionHistory');
-      displayHistory();
+      fetch("/clear_history", {
+        method: "DELETE"
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          displayHistory();
+        }
+      })
+      .catch(error => {
+        console.error("Clear error:", error);
+        alert("Could not clear history.");
+      });
     }
   });
   

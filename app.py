@@ -83,7 +83,10 @@ def extract_isl_structure_spacy(text):
     tense_marker = ""
 
     # List of direction-related words that should not be lemmatized
-    keep_words = {"left", "right", "back", "straight", "forward", "up", "down", "near", "next", "beside", "in", "on", "under","from","to"}
+    keep_words = {"left", "right", "back", "straight", "forward", "up", "down", "near", "next", "beside", "in", "on", "under", "from", "to", "at"}
+
+    # List of auxiliary verbs to retain
+    retain_auxiliaries = {"be"}
 
     for token in doc:
         # Preserve direction words as they are
@@ -91,15 +94,22 @@ def extract_isl_structure_spacy(text):
             important_words.append(token.text.lower())
             continue
 
-        # Remove auxiliary verbs
+        # Retain specific auxiliary verbs
+        if token.pos_ in ["AUX"] and token.lemma_ in retain_auxiliaries:
+            important_words.append(token.lemma_)
+            continue
+
+        # Remove other auxiliary verbs
         if token.pos_ in ["AUX"] and token.lemma_ in ["be", "do", "have", "will"]:
             if token.lemma_ == "will":
                 tense_marker = "FUTURE"
             continue 
         
-        if token.pos_ in ["DET", "ADP"]:  # Remove determiners and prepositions
+        # Remove determiners and prepositions (except those in keep_words)
+        if token.pos_ in ["DET", "ADP"] and token.text.lower() not in keep_words:
             continue
         
+        # Handle verbs
         if token.tag_ in ["VBD", "VBN"]:  # Past tense verbs
             tense_marker = "PAST"
             important_words.append(token.lemma_)
@@ -125,7 +135,6 @@ def about():
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
-
 
 @app.route('/save_text', methods=['POST'])
 def save_text():

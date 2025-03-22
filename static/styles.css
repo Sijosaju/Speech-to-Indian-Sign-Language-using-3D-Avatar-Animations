@@ -35,10 +35,10 @@
   --sidebar-width: 240px;
 }
 .btn.primary {
-  background-color: var(--primary) !important; /* Force blue color */
-  color: white !important; /* Force white text */
+  background-color: var(--primary) !important; 
+  color: white !important; 
 }
-/* ISL Grammar Textbox */
+
 #islBox {
   background-color: var(--bg-secondary);
   border: 1px solid var(--gray-300);
@@ -80,7 +80,7 @@
   font-style: italic;
 }
 .btn.primary:hover {
-  background-color: var(--primary-dark) !important; /* Force darker blue on hover */
+  background-color: var(--primary-dark) !important; 
 }
 body {
   font-family: 'Inter', sans-serif;
@@ -104,7 +104,7 @@ body.dark-mode {
   --gray-800: #d1d5db;
 }
 
-/* Layout */
+
 .app-container {
   display: flex;
   height: 100vh;
@@ -129,7 +129,7 @@ body.dark-mode {
   flex-direction: column;
 }
 
-/* Sidebar Styles */
+
 .logo {
   display: flex;
   align-items: center;
@@ -195,7 +195,7 @@ body.dark-mode {
   color: var(--primary);
 }
 
-/* Content Header */
+
 .content-header {
   margin-bottom: 2rem;
 }
@@ -212,7 +212,7 @@ body.dark-mode {
   font-size: 1rem;
 }
 
-/* Workspace */
+
 .workspace {
   display: flex;
   flex-direction: column;
@@ -220,7 +220,7 @@ body.dark-mode {
   flex: 1;
 }
 
-/* Input Panel */
+
 .input-panel {
   background-color: var(--bg-primary);
   border-radius: var(--border-radius-lg);
@@ -306,7 +306,6 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
 }
 
-/* Output Panel */
 .output-panel {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -356,11 +355,13 @@ textarea:focus {
   align-items: center;
   gap: 1rem;
   color: var(--gray-500);
+  animation: float 3s ease-in-out infinite;
 }
 
 .placeholder-animation svg {
   width: 48px;
   height: 48px;
+  stroke: var(--accent);
   stroke-width: 1;
 }
 
@@ -370,7 +371,7 @@ textarea:focus {
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
 }
-/* About Section */
+
 .about-section {
   background-color: var(--bg-primary);
   border-radius: var(--border-radius-lg);
@@ -413,7 +414,7 @@ textarea:focus {
   margin-bottom: 0.5rem;
 }
 
-/* Responsive Design */
+
 @media (max-width: 1024px) {
   .output-panel {
     grid-template-columns: 1fr;
@@ -454,7 +455,7 @@ textarea:focus {
     padding: 1rem;
   }
 }
-/* Contact Section */
+
 .contact-section {
   background-color: var(--bg-primary);
   border-radius: var(--border-radius-lg);
@@ -537,7 +538,7 @@ textarea:focus {
   align-self: flex-start;
 }
 
-/* For very small screens */
+
 @media (max-width: 480px) {
   .sidebar {
     padding: 0.75rem;

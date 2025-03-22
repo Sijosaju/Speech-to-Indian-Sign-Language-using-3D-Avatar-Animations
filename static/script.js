@@ -286,3 +286,4 @@ document.addEventListener('DOMContentLoaded', () => {
     isRecording ? stopRecording() : startRecording();
   });
 });
+

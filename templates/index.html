@@ -1,113 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Speech to ISL Translator</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Indian Sign Language</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> <!-- FontAwesome for icons -->
 </head>
 <body>
-  <div class="app-container">
-    <div class="sidebar">
-      <div class="logo">
-        <span class="logo-icon"></span>
-        <span class="logo-text">ISL Translator</span>
-      </div>
-      <nav class="nav-menu">
-        <a href="{{ url_for('index') }}" class="nav-item active">
-          <i data-feather="mic"></i>
-          <span>Translate</span>
-        </a>
-        <a href="#" id="history-button" class="nav-item">
-          <i data-feather="clock"></i>
-          <span>History</span>
-        </a>
-        <a href="{{ url_for('about') }}" class="nav-item">
-          <i data-feather="info"></i>
-          <span>About</span>
-        </a>
-        <a href="{{ url_for('contact') }}" class="nav-item">
-          <i data-feather="mail"></i>
-          <span>Contact</span>
-        </a>
-      </nav>
-      <div class="theme-toggle">
-        <i data-feather="moon"></i>
-        <span>Dark Mode</span>
-      </div>
+
+    <!-- Header Section -->
+    <div class="header">
+        <h1>Speech to Indian Sign Language</h1>
+        <div class="navbar">
+            <header>
+                <nav>
+                    <ul>
+                        <li><a href="{{ url_for('home') }}">Home</a></li>
+                        <li><a href="{{ url_for('history') }}">History</a></li>
+                        <li><a href="{{ url_for('about') }}">About</a></li>
+                        <li><a href="{{ url_for('contact') }}">Contact</a></li>
+                    </ul>
+                </nav>
+            </header>
+        </div>
     </div>
 
-    <main class="content">
-      <header class="content-header">
-        <h1>Speech to Indian Sign Language Translator</h1>
-        <p class="subtitle">Translate spoken language to ISL in real-time</p>
-      </header>
-
-      <div class="workspace">
-        <div class="input-panel">
-          <div class="panel-header">
-            <h2>Speech Input</h2>
-            <div class="controls">
-              <button id="micButton" class="btn primary">
-                <i data-feather="mic"></i>
-                <span>Start Recording</span>
-              </button>
-              <button id="clearButton" class="btn secondary">
-                <i data-feather="trash-2"></i>
-                <span>Clear</span>
-              </button>
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Left Section -->
+        <div class="left-section">
+            <textarea class="speech-input" placeholder="Your speech will appear here..."></textarea>
+            <div class="buttons">
+                <button id="start-recording"><i class="fas fa-microphone"></i> Start Recording</button>
+                <button id="clear-text"><i class="fas fa-trash"></i> Clear</button>
             </div>
-          </div>
-          <div class="transcript-container">
-            <textarea id="transcript" readonly placeholder="Your transcribed text will appear here..."></textarea>
-          </div>
+
+            <h2>ISL Translation</h2>
+            <textarea class="translation-text" placeholder="Processed text will appear here..." readonly></textarea>
         </div>
 
-        <div class="output-panel">
-          <div class="grammar-section">
-            <h2>ISL Grammar</h2>
-            <div id="islBox" class="result-box"></div>
-          </div>
-          
-          <div class="animation-section">
-            <h2>Sign Language Animation</h2>
-            <div id="animationContainer" class="animation-container">
-              <div class="placeholder-animation">
-                <i data-feather="video"></i>
-                <p>Animation will appear here</p>
-              </div>
-            </div>
-          </div>
+        <!-- Right Section - Animation Box -->
+        <div class="right-section">
+            <p>Animation will appear here...</p>
         </div>
-      </div>
-    </main>
-
-    <!-- History Panel -->
-    <div id="history-panel" class="history-panel">
-      <div class="history-header">
-        <h3>Conversion History</h3>
-        <button id="clearHistoryButton">Clear All</button>
-        <button id="close-history" class="btn icon-btn">
-          <i data-feather="x"></i>
-        </button>
-      </div>
-      <div id="history-list" class="history-list"></div>
     </div>
-  </div>
 
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      feather.replace();
-      
-      // Theme toggle functionality
-      const themeToggle = document.querySelector('.theme-toggle');
-      themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-      });
-    });
-  </script>
 </body>
 </html>

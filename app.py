@@ -231,3 +231,19 @@ def save_text():
 
 if __name__ == '__main__':
     app.run(debug=True)
+@app.route('/check_models', methods=['POST'])
+def check_models():
+    data = request.get_json()
+    if not data or 'words' not in data:
+        return jsonify({"error": "Missing words list"}), 400
+
+    existing_models = []
+    for word in data['words']:
+        # Check both words and letters
+        word_path = os.path.join('static', 'models', 'words', f"{word.lower()}.glb")
+        letter_path = os.path.join('static', 'models', 'letters', f"{word.lower()}.glb")
+        
+        if os.path.exists(word_path) or os.path.exists(letter_path):
+            existing_models.append(word.lower())
+
+    return jsonify({"available_models": existing_models})

@@ -1,326 +1,372 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Debug mode
+  const DEBUG = true;
+  
+  // Elements
   const micButton = document.getElementById('micButton');
   const transcript = document.getElementById('transcript');
   const islBox = document.getElementById('islBox');
   const animationContainer = document.getElementById('animationContainer');
-  const historyPanel = document.getElementById('history-panel');
   
+  // Three.js variables
+  let scene, camera, renderer, mixer, currentModel;
+  
+  // Speech recognition
   let recognition;
   let isRecording = false;
-  
-  // Speech Recognition Setup
-  if (!('webkitSpeechRecognition' in window)) {
-    alert("Speech recognition not supported in this browser!");
-    micButton.disabled = true;
-    return;
-  }
 
-  recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = "en-US";
+  // Animation dataset (to be populated dynamically)
+  const animationDataset = {};
 
-  // History Functions
-  function saveToHistory(originalText, islText) {
-    fetch("/save_history", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ original_text: originalText, isl_text: islText })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.error) {
-        console.error("History save error:", data.error);
-      }
-    })
-    .catch(error => {
-      console.error("Error saving history:", error);
+  // Load animation scripts dynamically
+  const letters = ['A', 'B', 'O', 'T', 'U'];
+  const words = ['are', 'how', 'you'];
+
+  function loadAnimationScripts() {
+    // Load letter animations
+    letters.forEach(letter => {
+      const script = document.createElement('script');
+      script.src = `/static/models/letters/${letter}.js`;
+      script.onload = () => {
+        log(`Loaded ${letter}.js`);
+        animationDataset[letter.toLowerCase()] = window[letter];
+        log(`animationDataset[${letter.toLowerCase()}] set to:`, animationDataset[letter.toLowerCase()]);
+      };
+      script.onerror = () => logError(`Failed to load ${letter}.js`);
+      document.head.appendChild(script);
+    });
+
+    // Load word animations
+    words.forEach(word => {
+      const script = document.createElement('script');
+      script.src = `/static/models/words/${word}.js`;
+      script.onload = () => {
+        log(`Loaded ${word}.js`);
+        animationDataset[word.toLowerCase()] = window[word.toUpperCase()];
+        log(`animationDataset[${word.toLowerCase()}] set to:`, animationDataset[word.toLowerCase()]);
+      };
+      script.onerror = () => logError(`Failed to load ${word}.js`);
+      document.head.appendChild(script);
     });
   }
-  
 
- // Modify the displayHistory function
-function displayHistory() {
-  fetch("/get_history")
-    .then(response => response.json())
-    .then(data => {
-      const historyList = document.getElementById('history-list');
-      if (data.error) {
-        historyList.innerHTML = `<div class="error">${data.error}</div>`;
-        return;
+  // 1. INITIALIZE THREE.JS
+  function initThreeJS() {
+    if (scene) return;
+    
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf0f0f0);
+    
+    camera = new THREE.PerspectiveCamera(
+      75, 
+      animationContainer.offsetWidth / animationContainer.offsetHeight, 
+      0.1, 
+      1000
+    );
+    camera.position.set(0, 0, 3); // Adjusted to view from the front
+    
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(animationContainer.offsetWidth, animationContainer.offsetHeight);
+    animationContainer.innerHTML = '';
+    animationContainer.appendChild(renderer.domElement);
+    
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(1, 1, 1);
+    scene.add(directionalLight);
+
+    // Load the single GLB model
+    loadModel();
+  }
+
+  function loadModel() {
+    new THREE.GLTFLoader().load(
+      '/static/models/appu.glb',
+      (gltf) => {
+        currentModel = gltf.scene;
+        // Adjust position, scale, and rotation
+        currentModel.scale.set(1.2, 1.2, 1.2); // Slightly larger
+        currentModel.position.set(0, -1, 0); // Move up to center in view
+        currentModel.rotation.set(0, -Math.PI/2, 0); // Rotate 90 degrees counterclockwise to face forward
+        scene.add(currentModel);
+        mixer = new THREE.AnimationMixer(currentModel);
+
+        // Debug: Log bone names to verify
+        currentModel.traverse((node) => {
+          if (node.isBone) {
+            log(`Bone found: ${node.name}`);
+          }
+        });
+
+        // Start render loop
+        const clock = new THREE.Clock();
+        const animate = () => {
+          const delta = clock.getDelta();
+          if (mixer) mixer.update(delta);
+          renderer.render(scene, camera);
+          requestAnimationFrame(animate);
+        };
+        animate();
+      },
+      undefined,
+      (error) => {
+        logError('Error loading model:', error);
+        showPlaceholder('Error loading model');
+      }
+    );
+  }
+
+  // 2. SPEECH RECOGNITION
+  function initSpeechRecognition() {
+    if (!('webkitSpeechRecognition' in window)) {
+      showError("Browser doesn't support speech recognition. Use Chrome or Edge.");
+      return null;
+    }
+
+    const recog = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recog.continuous = true;
+    recog.interimResults = true;
+    recog.lang = 'en-US';
+
+    // Event handlers
+    recog.onstart = () => {
+      log('Recording started');
+      isRecording = true;
+      updateMicButton(true);
+    };
+
+    recog.onresult = (event) => {
+      const results = [];
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          results.push(event.results[i][0].transcript);
+        }
       }
       
-      historyList.innerHTML = data.length > 0 
-        ? data.map(entry => `
-            <div class="history-item" data-id="${entry._id}">
-              <button class="delete-btn" data-id="${entry._id}">
-                <i data-feather="trash-2"></i>
-              </button>
-              <div class="history-time">${new Date(entry.timestamp).toLocaleString()}</div>
-              <div class="history-query">${entry.original_text}</div>
-              <div class="history-isl">${entry.isl_text}</div>
-            </div>
-          `).join('')
-        : '<div class="empty-history">No conversions yet</div>';
-      feather.replace();
-    })
-    .catch(error => {
-      console.error("History fetch error:", error);
-      historyList.innerHTML = '<div class="error">Error loading history</div>';
-    });
-}
-
-  // History Event Listeners
-  document.getElementById('history-button').addEventListener('click', () => {
-    historyPanel.classList.add('show');
-    displayHistory();
-  });
-
-  document.getElementById('close-history').addEventListener('click', () => {
-    historyPanel.classList.remove('show');
-  });
-
-  document.getElementById('history-list').addEventListener('click', (e) => {
-    if (e.target.closest('.delete-btn')) {
-      const id = e.target.closest('.delete-btn').dataset.id;
-      if (confirm("Are you sure you want to delete this entry?")) {
-        fetch(`/delete_history/${id}`, {
-          method: "DELETE"
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.error) {
-            alert(data.error);
-          } else {
-            displayHistory();
-          }
-        })
-        .catch(error => {
-          console.error("Delete error:", error);
-          alert("Could not delete entry.");
-        });
+      if (results.length > 0) {
+        const finalText = results.join(' ');
+        transcript.value += finalText + ' ';
+        log('Final transcript:', finalText);
+        sendTextForProcessing(finalText);
       }
-    }
-  });
+    };
 
-  document.getElementById('clearHistoryButton').addEventListener('click', () => {
-    if (confirm("Are you sure you want to clear all conversion history?")) {
-      fetch("/clear_history", {
-        method: "DELETE"
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          alert(data.error);
-        } else {
-          displayHistory();
-        }
-      })
-      .catch(error => {
-        console.error("Clear error:", error);
-        alert("Could not clear history.");
-      });
-    }
-  });
-  
+    recog.onerror = (event) => {
+      logError('Recognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        showError("Microphone access denied. Allow permissions in browser settings.");
+      }
+      stopRecording();
+    };
 
-  // Speech Recognition Handlers
-  recognition.onstart = () => {
-    isRecording = true;
-    micButton.innerHTML = '<i data-feather="mic-off"></i> Stop Recording';
-    micButton.classList.add('recording');
-    feather.replace();
-  };
+    recog.onend = () => {
+      log('Recording ended');
+      if (isRecording) {
+        log('Restarting recognition...');
+        setTimeout(() => recognition.start(), 100);
+      }
+    };
 
-  recognition.onresult = (event) => {
-    let interim = '';
-    let final = '';
-    
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const text = event.results[i][0].transcript;
-      event.results[i].isFinal ? final += text : interim += text;
-    }
-    
-    transcript.value = final + interim;
-    
-    if (final) {
-      sendTextForProcessing(final);
-    }
-  };
-
-  recognition.onerror = (event) => {
-    console.error("Recognition error:", event.error);
-    stopRecording();
-  };
-
-  recognition.onend = () => {
-    if (isRecording) recognition.start();
-  };
-
-  // Text Processing
-  function sendTextForProcessing(text) {
-    fetch("http://127.0.0.1:5000/save_text", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: text })
-    })
-    .then(response => response.json())
-    .then(data => {
-      islBox.innerHTML = formatISLStructure(data.isl_structure);
-      saveToHistory(data.original_text, data.isl_structure);
-      // Split the ISL structure into words
-      const words = data.isl_structure.split(' ').filter(w => w.trim());
-      displayAnimationsSequentially(words);
-    })
-    .catch(error => {
-      console.error("Processing error:", error);
-      islBox.innerHTML = '<span class="error">Error processing text</span>';
-    });
+    return recog;
   }
 
-  // ISL Formatting
-  function formatISLStructure(islText) {
-    return islText.split('|').map(sentence => 
-      sentence.trim().split(' ').map(word => 
-        `<span class="isl-word ${getWordClass(word)}">${word}</span>`
-      ).join(' ')
-    ).join('<span class="sentence-divider">|</span>');
-  }
-
-  function getWordClass(word) {
-    if (isTimeWord(word)) return 'time';
-    if (isQuestionWord(word)) return 'question';
-    if (isNegationWord(word)) return 'negation';
-    return '';
-  }
-
-  // Animation Handling
-  async function displayAnimationsSequentially(words) {
-    animationContainer.innerHTML = '';
-    for (const word of words) {
-      await displayWordAnimation(word.toLowerCase());
-    }
-  }
-
-  async function displayWordAnimation(word) {
-    const animationFile = `static/animations/${word}.mp4`;
+  // 3. TEXT PROCESSING AND ISL CONVERSION
+  async function sendTextForProcessing(text) {
     try {
-      const response = await fetch(animationFile);
-      if (response.ok) {
-        // Word animation exists – display it
-        const videoElement = document.createElement('video');
-        videoElement.src = animationFile;
-        videoElement.autoplay = true;
-        videoElement.controls = false;
-        videoElement.classList.add('animation-video');
-  
-        // Clear previous animation and display the new one
-        animationContainer.innerHTML = '';
-        animationContainer.appendChild(videoElement);
-  
-        // Wait until the video finishes
-        await new Promise(resolve => {
-          videoElement.onended = resolve;
-        });
-      } else {
-        // Fallback: display letter animations
-        await displayLetterAnimationsSequentially(word);
+      islBox.innerHTML = '<div class="loading">Processing to ISL...</div>';
+      
+      const response = await fetch("http://127.0.0.1:5000/save_text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.trim() })
+      });
+
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      
+      const data = await response.json();
+      
+      if (!data.isl_structure) {
+        throw new Error("No ISL structure returned");
       }
+
+      log("ISL tokens:", data.isl_structure);
+      islBox.innerHTML = '';
+      await animateISL(data.isl_structure);
+      
     } catch (error) {
-      console.error("Error fetching animation:", error);
-      await displayLetterAnimationsSequentially(word);
+      logError("Processing error:", error);
+      islBox.innerHTML = `<div class="error">Error: ${error.message}</div>`;
     }
   }
 
-  async function displayLetterAnimationsSequentially(word) {
-    const letters = word.split('');
-    for (const letter of letters) {
-      const letterAnimationFile = `static/animations/${letter}.mp4`;
-      try {
-        const response = await fetch(letterAnimationFile);
-        if (response.ok) {
-          const videoElement = document.createElement('video');
-          videoElement.src = letterAnimationFile;
-          videoElement.autoplay = true;
-          videoElement.controls = false;
-          videoElement.classList.add('animation-video');
-  
-          animationContainer.innerHTML = '';
-          animationContainer.appendChild(videoElement);
-  
-          await new Promise(resolve => {
-            videoElement.onended = resolve;
-          });
-        } else {
-          displayLetterPlaceholder(letter);
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
+  // 4. ANIMATION SYSTEM
+  async function animateISL(islText) {
+    const tokens = islText.split(' ').filter(t => t.trim());
+    initThreeJS();
+    
+    for (const token of tokens) {
+      const tokenLower = token.toLowerCase();
+      if (animationDataset[tokenLower]) {
+        // Whole word animation exists
+        await displayAndAnimateToken(token, tokenLower);
+      } else {
+        // Split into letters
+        for (const char of tokenLower) {
+          if (animationDataset[char]) {
+            await displayAndAnimateToken(char, char);
+          } else {
+            await displayAndAnimateToken(char, null);
+          }
         }
-      } catch (error) {
-        console.error("Error fetching letter animation:", error);
-        displayLetterPlaceholder(letter);
-        await new Promise(resolve => setTimeout(resolve, 1000));
       }
+      // Add space between tokens
+      islBox.innerHTML += ' ';
+      await delay(200); // Pause between words
     }
   }
-  
-  function displayLetterPlaceholder(letter) {
-    const placeholder = document.createElement('div');
-    placeholder.textContent = letter;
-    placeholder.classList.add('animation-placeholder');
-  
-    const animationWrapper = document.createElement('div');
-    animationWrapper.classList.add('animation-wrapper');
-    animationWrapper.appendChild(placeholder);
-  
-    const videoName = document.createElement('div');
-    videoName.textContent = letter;
-    videoName.classList.add('video-name');
-    animationWrapper.appendChild(videoName);
-  
-    animationContainer.innerHTML = '';
-    animationContainer.appendChild(animationWrapper);
+
+  async function displayAndAnimateToken(text, animationKey) {
+    // Display text letter-by-letter
+    for (const char of text) {
+      islBox.innerHTML += `<span class="isl-token">${char}</span>`;
+      await delay(100); // Delay for letter-by-letter display
+    }
+
+    // Play animation if available
+    if (animationKey && animationDataset[animationKey]) {
+      log(`Playing animation for: ${animationKey}`);
+      const animationFunc = animationDataset[animationKey];
+      const animationRef = {
+        animations: [],
+        pending: false,
+        animate: async function() {
+          if (this.animations.length === 0) {
+            this.pending = false;
+            log(`Finished animations for: ${animationKey}`);
+            return;
+          }
+
+          const anims = this.animations.shift();
+          const actions = [];
+
+          anims.forEach(([boneName, property, axis, value, direction]) => {
+            const bone = currentModel.getObjectByName(boneName);
+            if (bone) {
+              const startValue = bone[property][axis];
+              const endValue = direction === '+' ? value : -value;
+              const keyframe = new THREE.NumberKeyframeTrack(
+                `${boneName}.${property}.${axis}`,
+                [0, 1.5], // Increased duration to 1.5 seconds
+                [startValue, endValue]
+              );
+              const clip = new THREE.AnimationClip(null, 1.5, [keyframe]);
+              const action = mixer.clipAction(clip);
+              action.setLoop(THREE.LoopOnce);
+              action.clampWhenFinished = true;
+              actions.push(action);
+            } else {
+              logError(`Bone not found: ${boneName}`);
+            }
+          });
+
+          if (actions.length > 0) {
+            log(`Playing ${actions.length} actions for: ${animationKey}`);
+            actions.forEach(action => action.play());
+            await new Promise(resolve => {
+              mixer.addEventListener('finished', function onFinished() {
+                mixer.removeEventListener('finished', onFinished);
+                log(`Animation step completed for: ${animationKey}`);
+                resolve();
+              });
+            });
+          } else {
+            log(`No actions to play for: ${animationKey}`);
+          }
+
+          this.animate();
+        }
+      };
+
+      animationFunc(animationRef);
+      await delay(1500); // Wait for animation to complete (increased to 1500ms)
+    } else {
+      log(`No animation found for: ${animationKey || text}`);
+      await delay(1500); // Default delay if no animation
+    }
   }
 
-  // UI Controls
-  micButton.addEventListener('click', () => {
-    isRecording ? stopRecording() : startRecording();
-  });
+  // 5. UTILITY FUNCTIONS
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
-  document.getElementById('clearButton').addEventListener('click', () => {
-    transcript.value = '';
-    islBox.innerHTML = '';
-    animationContainer.innerHTML = '<div class="placeholder-animation"><i data-feather="video"></i><p>Animation will appear here</p></div>';
-    feather.replace();
+  function showPlaceholder(char) {
+    animationContainer.innerHTML = `
+      <div style="
+        font-size: 100px;
+        text-align: center;
+        line-height: ${animationContainer.offsetHeight}px;
+      ">
+        ${char.toUpperCase()}
+      </div>
+    `;
+  }
+
+  // 6. UI CONTROLS
+  micButton.addEventListener('click', () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
   });
 
   function startRecording() {
-    recognition.start();
-    isRecording = true;
+    log('Starting recording...');
+    if (!recognition) {
+      recognition = initSpeechRecognition();
+    }
+    
+    if (recognition) {
+      transcript.value = '';
+      recognition.start();
+      updateMicButton(true);
+    }
   }
 
   function stopRecording() {
-    recognition.stop();
+    log('Stopping recording...');
     isRecording = false;
-    micButton.innerHTML = '<i data-feather="mic"></i> Start Recording';
-    micButton.classList.remove('recording');
+    if (recognition) {
+      recognition.stop();
+    }
+    updateMicButton(false);
+  }
+
+  function updateMicButton(recording) {
+    micButton.innerHTML = recording
+      ? '<i data-feather="mic-off"></i> Stop Recording'
+      : '<i data-feather="mic"></i> Start Recording';
+    micButton.classList.toggle('recording', recording);
     feather.replace();
   }
 
-  // Helper Functions
-  function isTimeWord(word) {
-    const timeWords = ['today', 'tomorrow', 'yesterday', 'now', 'later'];
-    return timeWords.includes(word.toLowerCase());
+  function showError(message) {
+    console.error(message);
+    alert(message);
   }
 
-  function isQuestionWord(word) {
-    const questionWords = ['what', 'where', 'when', 'why', 'how'];
-    return questionWords.includes(word.toLowerCase());
+  function log(...args) {
+    if (DEBUG) console.log('[DEBUG]', ...args);
   }
 
-  function isNegationWord(word) {
-    return ['not', 'no', 'never'].includes(word.toLowerCase());
+  function logError(...args) {
+    console.error('[ERROR]', ...args);
   }
 
-  // Initialize Feather Icons
+  // Initialize
+  loadAnimationScripts();
   feather.replace();
 });

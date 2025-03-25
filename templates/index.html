@@ -6,7 +6,14 @@
   <title>Speech to ISL Translator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Load Feather Icons -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+  
+  <!-- Load Three.js and required extensions -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/animation/AnimationMixer.js"></script>
 </head>
 <body>
   <div class="app-container">
@@ -24,7 +31,7 @@
           <i data-feather="clock"></i>
           <span>History</span>
         </a>
-        <a href="{{ url_for('about') }}" class="nav-item">
+        <a href="{{ url_for('index') }}" class="nav-item">
           <i data-feather="info"></i>
           <span>About</span>
         </a>
@@ -71,9 +78,10 @@
             <div id="islBox" class="result-box"></div>
           </div>
           
+          <!-- Animation Container -->
           <div class="animation-section">
             <h2>Sign Language Animation</h2>
-            <div id="animationContainer" class="animation-container">
+            <div id="animationContainer" style="width:100%; height:400px; background:#f0f0f0;">
               <div class="placeholder-animation">
                 <i data-feather="video"></i>
                 <p>Animation will appear here</p>
@@ -97,7 +105,9 @@
     </div>
   </div>
 
+  <!-- Load your script AFTER Three.js -->
   <script src="{{ url_for('static', filename='script.js') }}"></script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       feather.replace();

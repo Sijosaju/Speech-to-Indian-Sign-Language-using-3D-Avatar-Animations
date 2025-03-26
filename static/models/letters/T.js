@@ -1,54 +1,54 @@
 window.T = (ref) => {
-    let animations = [];
-  
-    // Right hand: Index finger extended, others folded
-    animations.push(["RightHandIndex1", "rotation", "z", 0, "+"]);
-    animations.push(["RightHandMiddle2", "rotation", "z", Math.PI/2, "+"]);
-    animations.push(["RightHandRing2", "rotation", "z", Math.PI/2, "+"]);
-    animations.push(["RightHandPinky2", "rotation", "z", Math.PI/2, "+"]);
-    animations.push(["RightHandThumb3", "rotation", "y", -Math.PI/3, "-"]);
-  
-    animations.push(["RightHand", "rotation", "x", Math.PI/2, "+"]);
-    animations.push(["RightHand", "rotation", "y", -Math.PI/2, "-"]);
-    animations.push(["RightHand", "rotation", "z", 0, "+"]);
-  
-    animations.push(["RightForeArm", "rotation", "z", Math.PI/4, "+"]);
-    animations.push(["RightForeArm", "rotation", "x", -Math.PI/6, "-"]);
-    animations.push(["RightArm", "rotation", "x", -Math.PI/4, "-"]);
-    animations.push(["RightArm", "rotation", "y", -Math.PI/6, "-"]);
-  
-    // Left hand: Neutral
-    animations.push(["LeftHand", "rotation", "x", 0, "+"]);
-    animations.push(["LeftHand", "rotation", "y", 0, "+"]);
-    animations.push(["LeftHand", "rotation", "z", 0, "+"]);
-    animations.push(["LeftForeArm", "rotation", "x", 0, "+"]);
-    animations.push(["LeftForeArm", "rotation", "z", 0, "+"]);
-    animations.push(["LeftArm", "rotation", "x", 0, "+"]);
-  
-    ref.animations.push(animations);
-  
-    // Reset to neutral
-    animations = [];
-  
-    animations.push(["RightHandIndex1", "rotation", "z", 0, "-"]);
-    animations.push(["RightHandMiddle2", "rotation", "z", 0, "-"]);
-    animations.push(["RightHandRing2", "rotation", "z", 0, "-"]);
-    animations.push(["RightHandPinky2", "rotation", "z", 0, "-"]);
-    animations.push(["RightHandThumb3", "rotation", "y", 0, "+"]);
-  
-    animations.push(["RightHand", "rotation", "x", 0, "-"]);
-    animations.push(["RightHand", "rotation", "y", 0, "+"]);
-    animations.push(["RightHand", "rotation", "z", 0, "-"]);
-  
-    animations.push(["RightForeArm", "rotation", "z", 0, "-"]);
-    animations.push(["RightForeArm", "rotation", "x", 0, "+"]);
-    animations.push(["RightArm", "rotation", "x", 0, "+"]);
-    animations.push(["RightArm", "rotation", "y", 0, "+"]);
-  
-    ref.animations.push(animations);
-  
-    if (ref.pending === false) {
-      ref.pending = true;
-      ref.animate();
-    }
-  };
+  let animations = [];
+
+  // Right hand: Index finger extended, others folded
+  animations.push(["mixamorigRightHandIndex1", "rotation", "z", 0, "+"]);
+  animations.push(["mixamorigRightHandMiddle2", "rotation", "z", Math.PI/2, "+"]);
+  animations.push(["mixamorigRightHandRing2", "rotation", "z", Math.PI/2, "+"]);
+  animations.push(["mixamorigRightHandPinky2", "rotation", "z", Math.PI/2, "+"]);
+  animations.push(["mixamorigRightHandThumb3", "rotation", "y", -Math.PI/3, "-"]);
+
+  animations.push(["mixamorigRightHand", "rotation", "x", Math.PI/2, "+"]);
+  animations.push(["mixamorigRightHand", "rotation", "y", -Math.PI/2, "-"]);
+  animations.push(["mixamorigRightHand", "rotation", "z", 0, "+"]);
+
+  animations.push(["mixamorigRightForeArm", "rotation", "z", Math.PI/4, "+"]);
+  animations.push(["mixamorigRightForeArm", "rotation", "x", -Math.PI/6, "-"]);
+  animations.push(["mixamorigRightArm", "rotation", "x", -Math.PI/4, "-"]);
+  animations.push(["mixamorigRightArm", "rotation", "y", -Math.PI/6, "-"]);
+
+  // Left hand: Neutral
+  animations.push(["mixamorigLeftHand", "rotation", "x", 0, "+"]);
+  animations.push(["mixamorigLeftHand", "rotation", "y", 0, "+"]);
+  animations.push(["mixamorigLeftHand", "rotation", "z", 0, "+"]);
+  animations.push(["mixamorigLeftForeArm", "rotation", "x", 0, "+"]);
+  animations.push(["mixamorigLeftForeArm", "rotation", "z", 0, "+"]);
+  animations.push(["mixamorigLeftArm", "rotation", "x", 0, "+"]);
+
+  ref.animations.push(animations);
+
+  // Reset to neutral
+  animations = [];
+
+  animations.push(["mixamorigRightHandIndex1", "rotation", "z", 0, "-"]);
+  animations.push(["mixamorigRightHandMiddle2", "rotation", "z", 0, "-"]);
+  animations.push(["mixamorigRightHandRing2", "rotation", "z", 0, "-"]);
+  animations.push(["mixamorigRightHandPinky2", "rotation", "z", 0, "-"]);
+  animations.push(["mixamorigRightHandThumb3", "rotation", "y", 0, "+"]);
+
+  animations.push(["mixamorigRightHand", "rotation", "x", 0, "-"]);
+  animations.push(["mixamorigRightHand", "rotation", "y", 0, "+"]);
+  animations.push(["mixamorigRightHand", "rotation", "z", 0, "-"]);
+
+  animations.push(["mixamorigRightForeArm", "rotation", "z", 0, "-"]);
+  animations.push(["mixamorigRightForeArm", "rotation", "x", 0, "+"]);
+  animations.push(["mixamorigRightArm", "rotation", "x", 0, "+"]);
+  animations.push(["mixamorigRightArm", "rotation", "y", 0, "+"]);
+
+  ref.animations.push(animations);
+
+  if (ref.pending === false) {
+    ref.pending = true;
+    ref.animate();
+  }
+};

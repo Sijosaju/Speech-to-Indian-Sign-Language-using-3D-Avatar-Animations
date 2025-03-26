@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
   // Debug mode
   const DEBUG = true;
@@ -63,7 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
       0.1, 
       1000
     );
-    camera.position.set(0, 0, 3); // Adjusted to view from the front
+    camera.position.set(0, 0, 3); // View from the front
+    camera.lookAt(0, 0, 0);
     
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(animationContainer.offsetWidth, animationContainer.offsetHeight);
@@ -89,14 +91,20 @@ document.addEventListener('DOMContentLoaded', () => {
         // Adjust position, scale, and rotation
         currentModel.scale.set(1.2, 1.2, 1.2); // Slightly larger
         currentModel.position.set(0, -1, 0); // Move up to center in view
-        currentModel.rotation.set(0, -Math.PI/2, 0); // Rotate 90 degrees counterclockwise to face forward
+        currentModel.rotation.set(0, 0, 0); // Restore the working rotation
         scene.add(currentModel);
         mixer = new THREE.AnimationMixer(currentModel);
 
-        // Debug: Log bone names to verify
+        // Debug: Log bone names and their hierarchy
         currentModel.traverse((node) => {
           if (node.isBone) {
-            log(`Bone found: ${node.name}`);
+            let hierarchy = node.name;
+            let parent = node.parent;
+            while (parent && parent.name) {
+              hierarchy = `${parent.name} > ${hierarchy}`;
+              parent = parent.parent;
+            }
+            log(`Bone hierarchy: ${hierarchy}`);
           }
         });
 
@@ -238,6 +246,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (animationKey && animationDataset[animationKey]) {
       log(`Playing animation for: ${animationKey}`);
       const animationFunc = animationDataset[animationKey];
+
+      // Wait for the model to load
+      while (!currentModel) {
+        log('Waiting for model to load...');
+        await delay(100);
+      }
+
+      // Ensure the model is added to the scene
+      if (!scene.children.includes(currentModel)) {
+        log('Model not in scene, adding now...');
+        scene.add(currentModel);
+      }
+
       const animationRef = {
         animations: [],
         pending: false,
@@ -254,11 +275,16 @@ document.addEventListener('DOMContentLoaded', () => {
           anims.forEach(([boneName, property, axis, value, direction]) => {
             const bone = currentModel.getObjectByName(boneName);
             if (bone) {
+              log(`Found bone: ${boneName}`); // Debug: Confirm bone is found
               const startValue = bone[property][axis];
               const endValue = direction === '+' ? value : -value;
+              // Construct the full path based on the hierarchy
+              // For now, assume the hierarchy is Scene > Armature > boneName
+              // Adjust this based on the hierarchy logs
+              const trackPath = `Armature.${boneName}.${property}.${axis}`;
               const keyframe = new THREE.NumberKeyframeTrack(
-                `${boneName}.${property}.${axis}`,
-                [0, 1.5], // Increased duration to 1.5 seconds
+                trackPath,
+                [0, 1.5], // Duration 1.5 seconds
                 [startValue, endValue]
               );
               const clip = new THREE.AnimationClip(null, 1.5, [keyframe]);
@@ -290,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       animationFunc(animationRef);
-      await delay(1500); // Wait for animation to complete (increased to 1500ms)
+      await delay(1500); // Wait for animation to complete
     } else {
       log(`No animation found for: ${animationKey || text}`);
       await delay(1500); // Default delay if no animation

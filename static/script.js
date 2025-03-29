@@ -231,6 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
     state.scene.add(directionalLight);
     return true;
   }
+  
+  
+  
 
   function loadModel(modelPath) {
     return new Promise((resolve, reject) => {
@@ -334,6 +337,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isQuestionWord(word)) return 'question';
     if (isNegationWord(word)) return 'negation';
     return '';
+  }
+
+  // Dummy functions for word classification; replace with your actual logic if needed
+  function isTimeWord(word) {
+    return /\d/.test(word);
+  }
+  function isQuestionWord(word) {
+    return ["what", "why", "how", "when", "where"].includes(word.toLowerCase());
+  }
+  function isNegationWord(word) {
+    return ["not", "no"].includes(word.toLowerCase());
   }
 
   document.getElementById('history-button').addEventListener('click', () => {

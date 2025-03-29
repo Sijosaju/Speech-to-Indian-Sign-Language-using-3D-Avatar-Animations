@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 from flask_cors import CORS
 import nltk
 from nltk.tokenize import word_tokenize
@@ -7,6 +7,7 @@ import logging
 import spacy
 import re
 import os
+import requests
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -21,14 +22,10 @@ load_dotenv()
 
 MONGO_URI = os.getenv("MONGO_URI")
 
-
 client = MongoClient(MONGO_URI, connectTimeoutMS=30000)
 db = client['history']  # Use your database name
 histories_collection = db['histories']  # Use your collection name
 logger.info("Connected to MongoDB Atlas successfully!")
-
-
-
 
 # Download required NLTK resources
 def download_nltk_resources():
@@ -51,19 +48,61 @@ except Exception as e:
 app = Flask(__name__, template_folder="templates")
 CORS(app)
 
+# Proxy routes for Three.js resources to avoid CORS issues
+@app.route('/proxy/three/<path:path>')
+def proxy_three(path):
+    try:
+        target_url = f'https://unpkg.com/three@0.161.0/{path}'
+        logger.debug(f"Proxying Three.js resource from: {target_url}")
+        response = requests.get(target_url)
+        headers = dict(response.headers)
+        # Remove headers that may cause decoding issues
+        headers.pop('Transfer-Encoding', None)
+        headers.pop('Content-Encoding', None)
+        headers['Access-Control-Allow-Origin'] = '*'
+        return Response(
+            response.content,
+            status=response.status_code,
+            headers=headers,
+            content_type=response.headers.get('Content-Type', 'application/javascript')
+        )
+    except Exception as e:
+        logger.error(f"Error proxying Three.js resource: {e}")
+        return Response("Error loading resource", status=500)
+
+@app.route('/proxy/three/addons/<path:path>')
+def proxy_three_addons(path):
+    try:
+        target_url = f'https://unpkg.com/three@0.161.0/examples/jsm/{path}'
+        logger.debug(f"Proxying Three.js addon resource from: {target_url}")
+        response = requests.get(target_url)
+        headers = dict(response.headers)
+        headers.pop('Transfer-Encoding', None)
+        headers.pop('Content-Encoding', None)
+        headers['Access-Control-Allow-Origin'] = '*'
+        return Response(
+            response.content,
+            status=response.status_code,
+            headers=headers,
+            content_type=response.headers.get('Content-Type', 'application/javascript')
+        )
+    except Exception as e:
+        logger.error(f"Error proxying Three.js addon resource: {e}")
+        return Response("Error loading resource", status=500)
+
 @app.route('/save_history', methods=['POST'])
 def save_history():
     try:
         data = request.get_json()
         if not data or 'original_text' not in data or 'isl_text' not in data:
             return jsonify({"error": "Missing required fields"}), 400
-        
+
         history_entry = {
             "original_text": data['original_text'],
             "isl_text": data['isl_text'],
             "timestamp": datetime.utcnow()
         }
-        
+
         result = histories_collection.insert_one(history_entry)
         return jsonify({
             "message": "History saved successfully",
@@ -124,28 +163,21 @@ CONTRACTIONS = {
 def expand_contractions(text):
     """Expands contractions in the given text while preserving capitalization."""
     contractions_pattern = re.compile(r'\b(' + '|'.join(re.escape(k) for k in CONTRACTIONS.keys()) + r')\b', re.IGNORECASE)
-    
+
     def replace(match):
-        word = match.group(0).lower()  # Match word case-insensitively
-        expanded = CONTRACTIONS.get(word, word)  # Get expanded version
-        return expanded.capitalize() if match.group(0)[0].isupper() else expanded  # Preserve capitalization
+        word = match.group(0).lower()
+        expanded = CONTRACTIONS.get(word, word)
+        return expanded.capitalize() if match.group(0)[0].isupper() else expanded
 
     return contractions_pattern.sub(replace, text)
 
 def preprocess_text(text):
     """Enhanced preprocessing for ISL conversion with contraction handling and time format preservation."""
     text = text.lower().strip()
-    
-    # Expand contractions
     text = expand_contractions(text)
-
-    # Convert time format (e.g., "10:30" → "10 30", "7:00" → "7")
-    text = re.sub(r'\b(\d{1,2}):00\b', r'\1', text)  # Remove ':00'
-    text = re.sub(r'\b(\d{1,2}):(\d{1,2})\b', r'\1 \2', text)  # Replace ':' with space
-
-    # Remove all other non-alphanumeric characters except spaces
+    text = re.sub(r'\b(\d{1,2}):00\b', r'\1', text)
+    text = re.sub(r'\b(\d{1,2}):(\d{1,2})\b', r'\1 \2', text)
     text = re.sub(r'[^\w\s]', '', text)
-
     return text
 
 def extract_isl_structure_spacy(text):
@@ -156,43 +188,34 @@ def extract_isl_structure_spacy(text):
     doc = nlp(text)
     important_words = []
     tense_marker = ""
-
-    # List of direction-related words that should not be lemmatized
-    keep_words = {"left", "right", "back", "straight", "forward", "up", "down", "near", "next", "beside", "in", "on", "under","from","to"}
+    keep_words = {"left", "right", "back", "straight", "forward", "up", "down", "near", "next", "beside", "in", "on", "under", "from", "to"}
 
     for token in doc:
-        # Preserve direction words as they are
         if token.text.lower() in keep_words:
             important_words.append(token.text.lower())
             continue
-
-        # Remove auxiliary verbs
         if token.pos_ in ["AUX"] and token.lemma_ in ["be", "do", "have", "will"]:
             if token.lemma_ == "will":
                 tense_marker = "FUTURE"
-            continue 
-        
-        if token.pos_ in ["DET", "ADP"]:  # Remove determiners and prepositions
             continue
-        
-        if token.tag_ in ["VBD", "VBN"]:  # Past tense verbs
+        if token.pos_ in ["DET", "ADP"]:
+            continue
+        if token.tag_ in ["VBD", "VBN"]:
             tense_marker = "PAST"
             important_words.append(token.lemma_)
-        elif token.tag_ in ["VBG", "VBZ", "VBP"]:  # Present continuous/simple present
+        elif token.tag_ in ["VBG", "VBZ", "VBP"]:
             important_words.append(token.lemma_)
         else:
             important_words.append(token.lemma_)
 
-    # Add the tense marker at the end if applicable
     if tense_marker:
         important_words.append(tense_marker)
-
     return " ".join(important_words) if important_words else text
 
 @app.route('/')
 def index():
     return render_template('index.html')
-    
+
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -201,24 +224,22 @@ def about():
 def contact():
     return render_template('contact.html')
 
-
 @app.route('/save_text', methods=['POST'])
 def save_text():
     try:
         data = request.get_json()
         if not data or 'text' not in data:
             return jsonify({"isl_structure": "", "message": "No data provided", "error": True}), 400
-        
+
         text = data.get("text", "").strip()
         if not text:
             return jsonify({"isl_structure": "", "message": "No text provided", "error": True}), 400
-        
+
         logger.info(f"Received text: {text}")
         processed_text = preprocess_text(text)
-        
         isl_structure = extract_isl_structure_spacy(processed_text)
         logger.debug(f"spaCy extraction: {isl_structure}")
-        
+
         return jsonify({
             "isl_structure": isl_structure,
             "original_text": text,

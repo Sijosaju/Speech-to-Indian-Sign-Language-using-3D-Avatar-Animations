@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
+  <!-- Import map to load Three.js directly from jsDelivr -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 <body>
   <div class="app-container">
@@ -73,12 +82,15 @@
           
           <div class="animation-section">
             <h2>Sign Language Animation</h2>
+            <!-- The Three.js canvas will be inserted here -->
             <div id="animationContainer" class="animation-container">
               <div class="placeholder-animation">
                 <i data-feather="video"></i>
                 <p>Animation will appear here</p>
               </div>
             </div>
+            <!-- Hidden element for text tracking -->
+            <textarea id="output-text" class="hidden"></textarea>
           </div>
         </div>
       </div>
@@ -97,17 +109,6 @@
     </div>
   </div>
 
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      feather.replace();
-      
-      // Theme toggle functionality
-      const themeToggle = document.querySelector('.theme-toggle');
-      themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-      });
-    });
-  </script>
+  <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

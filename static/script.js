@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const micButton = document.getElementById('micButton');
   const transcriptField = document.getElementById('transcript');
   const islBox = document.getElementById('islBox');
+  const processedTextField = document.getElementById('processed-text'); // new field for processed text
   const animationContainer = document.getElementById('animationContainer');
   const historyPanel = document.getElementById('history-panel');
 
@@ -105,8 +106,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function addTextStep(animCommand) {
     if (!state.textTimer) {
-      const outputText = document.getElementById('output-text');
-      if (outputText) outputText.value += animCommand[1];
+      if (processedTextField) {
+        // Append the new letter or text fragment from the animation command
+        processedTextField.textContent += animCommand[1];
+      }
       state.textTimer = true;
       setTimeout(() => {
         state.textTimer = false;
@@ -237,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function initThree() {
     animationContainer.innerHTML = '';
     state.scene = new THREE.Scene();
-    // Changed background color to white
+    // Set background color (you can adjust as needed)
     state.scene.background = new THREE.Color(0x121212);
     
     state.camera = new THREE.PerspectiveCamera(
@@ -256,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.renderer.setSize(animationContainer.clientWidth, animationContainer.clientHeight);
     animationContainer.appendChild(state.renderer.domElement);
   
-    // Lighting setup remains unchanged
+    // Lighting setup
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     state.scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -268,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
     return true;
   }
-  
   
   function loadModel(modelPath) {
     return new Promise((resolve, reject) => {
@@ -283,7 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
               gltf.scene.traverse((child) => {
                 if (child.isMesh) {
                   child.frustumCulled = false;
-                  // Enable shadows on each mesh for better visual quality
                   child.castShadow = true;
                   child.receiveShadow = true;
                 }
@@ -320,6 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const words = text.toUpperCase().split(' ').filter(w => w.trim() !== '');
     state.animations = [];
     state.characters = [];
+    // Clear previous processed text
+    if (processedTextField) {
+      processedTextField.textContent = '';
+    }
 
     words.forEach(word => {
       console.log(`Processing word: ${word}`);
@@ -449,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clearButton').addEventListener('click', () => {
     transcriptField.value = '';
     islBox.innerHTML = '';
+    processedTextField.textContent = '';
     state.animations = [];
     const placeholderDiv = document.createElement('div');
     placeholderDiv.className = 'placeholder-animation';
@@ -530,4 +536,5 @@ document.addEventListener('DOMContentLoaded', () => {
   // Start the application
   initApp();
 });
+
 

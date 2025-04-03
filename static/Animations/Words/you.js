@@ -1,44 +1,50 @@
-export const youAnimation = (model) => {
-    // Initial pose - hand near chest
-    model.position.set(0, -0.1, 0);
-    model.rotation.z = Math.PI/8;
-  
-    const timeline = [];
+export const YOU = (ref) => {
+
+    let animations = []
+
+    animations.push(["mixamorigRightHandMiddle1", "rotation", "z", Math.PI/2, "+"]);
+    animations.push(["mixamorigRightHandMiddle2", "rotation", "z", Math.PI/2, "+"]);
+    animations.push(["mixamorigRightHandMiddle3", "rotation", "z", Math.PI/2, "+"]);
+    animations.push(["mixamorigRightHandRing1", "rotation", "z", Math.PI/2, "+"]);
+    animations.push(["mixamorigRightHandRing2", "rotation", "z", Math.PI/2, "+"]);
+    animations.push(["mixamorigRightHandRing3", "rotation", "z", Math.PI/2, "+"]);
+    animations.push(["mixamorigRightHandPinky1", "rotation", "z", Math.PI/2, "+"]);
+    animations.push(["mixamorigRightHandPinky2", "rotation", "z", Math.PI/2, "+"]);
+    animations.push(["mixamorigRightHandPinky3", "rotation", "z", Math.PI/2, "+"]);
+    animations.push(["mixamorigRightHandThumb2", "rotation", "y", -Math.PI/2, "-"]);
+
+    animations.push(["mixamorigRightArm", "rotation", "x", -Math.PI/6, "-"]);
+
+    animations.push(["mixamorigRightHand", "rotation", "x", Math.PI/6, "+"]);
+    animations.push(["mixamorigRightHand", "rotation", "z", Math.PI/3, "+"]);
+    animations.push(["mixamorigRightHand", "rotation", "y", -Math.PI/6, "-"]);
     
-    // Animation 1: Point forward
-    timeline.push({
-      duration: 0.7,
-      updates: [
-        {
-          object: model.position,
-          property: 'z',
-          from: 0,
-          to: 0.3
-        },
-        {
-          object: model.rotation,
-          property: 'z',
-          from: Math.PI/8,
-          to: -Math.PI/8
-        }
-      ]
-    });
-  
-    // Animation 2: Return slightly
-    timeline.push({
-      duration: 0.3,
-      updates: [
-        {
-          object: model.position,
-          property: 'z',
-          from: 0.3,
-          to: 0.2
-        }
-      ]
-    });
-  
-    return {
-      timeline,
-      loop: false
-    };
-  };
+    ref.animations.push(animations);
+
+    animations = []
+
+    animations.push(["mixamorigRightHandMiddle1", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHandMiddle2", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHandMiddle3", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHandRing1", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHandRing2", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHandRing3", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHandPinky1", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHandPinky2", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHandPinky3", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHandThumb2", "rotation", "y", 0, "+"]);
+
+    animations.push(["mixamorigRightArm", "rotation", "x", 0, "+"]);
+
+    animations.push(["mixamorigRightHand", "rotation", "x", 0, "-"]);
+    animations.push(["mixamorigRightHand", "rotation", "z", 0, "-"]);
+    animations.push(["mixamorigRightHand", "rotation", "y", 0, "+"]);
+
+    ref.animations.push(animations);
+
+    if(ref.pending === false){
+        ref.pending = true;
+        ref.animate();
+    }
+
+}

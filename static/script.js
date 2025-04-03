@@ -1,7 +1,7 @@
 // Import Three.js, GLTFLoader, and defaultPose via the import map
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-//import { defaultPose } from './Animations/defaultPose.js';
+import { defaultPose } from './Animations/defaultPose.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Element selectors

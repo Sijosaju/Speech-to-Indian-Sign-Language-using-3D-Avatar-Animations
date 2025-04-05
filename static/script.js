@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!initThree()) throw new Error("Three.js initialization failed");
       await loadAlphabetModules();
       await loadWordModules();
-      await loadModel(`/static/Models/${state.bot}/${state.bot}.glb`);
+      await loadModel(`/static/models/${state.bot}/${state.bot}.glb`);
       window.addEventListener('resize', () => {
         if (state.camera && state.renderer) {
           state.camera.aspect = animationContainer.clientWidth / animationContainer.clientHeight;

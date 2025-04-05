@@ -21,14 +21,10 @@ load_dotenv()
 
 MONGO_URI = os.getenv("MONGO_URI")
 
-
 client = MongoClient(MONGO_URI, connectTimeoutMS=30000)
 db = client['history']  # Use your database name
 histories_collection = db['histories']  # Use your collection name
 logger.info("Connected to MongoDB Atlas successfully!")
-
-
-
 
 # Download required NLTK resources
 def download_nltk_resources():
@@ -50,6 +46,18 @@ except Exception as e:
 
 app = Flask(__name__, template_folder="templates")
 CORS(app)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+    
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
 
 @app.route('/save_history', methods=['POST'])
 def save_history():
@@ -158,7 +166,7 @@ def extract_isl_structure_spacy(text):
     tense_marker = ""
 
     # List of direction-related words that should not be lemmatized
-    keep_words = {"left", "right", "back", "straight", "forward", "up", "down", "near", "next", "beside", "in", "on", "under","from","to"}
+    keep_words = {"left", "right", "back", "straight", "forward", "up", "down", "near", "next", "beside", "in", "on", "under", "from", "to"}
 
     for token in doc:
         # Preserve direction words as they are
@@ -189,19 +197,6 @@ def extract_isl_structure_spacy(text):
 
     return " ".join(important_words) if important_words else text
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-    
-@app.route('/about')
-def about():
-    return render_template('about.html')
-
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
-
-
 @app.route('/save_text', methods=['POST'])
 def save_text():
     try:
@@ -215,7 +210,6 @@ def save_text():
         
         logger.info(f"Received text: {text}")
         processed_text = preprocess_text(text)
-        
         isl_structure = extract_isl_structure_spacy(processed_text)
         logger.debug(f"spaCy extraction: {isl_structure}")
         
@@ -231,19 +225,4 @@ def save_text():
 
 if __name__ == '__main__':
     app.run(debug=True)
-@app.route('/check_models', methods=['POST'])
-def check_models():
-    data = request.get_json()
-    if not data or 'words' not in data:
-        return jsonify({"error": "Missing words list"}), 400
 
-    existing_models = []
-    for word in data['words']:
-        # Check both words and letters
-        word_path = os.path.join('static', 'models', 'words', f"{word.lower()}.glb")
-        letter_path = os.path.join('static', 'models', 'letters', f"{word.lower()}.glb")
-        
-        if os.path.exists(word_path) or os.path.exists(letter_path):
-            existing_models.append(word.lower())
-
-    return jsonify({"available_models": existing_models})

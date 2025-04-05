@@ -34,10 +34,12 @@
   --transition: 0.3s ease;
   --sidebar-width: 240px;
 }
+
 .btn.primary {
   background-color: var(--primary) !important; /* Force blue color */
   color: white !important; /* Force white text */
 }
+
 /* ISL Grammar Textbox */
 #islBox {
   background-color: var(--bg-secondary);
@@ -79,9 +81,11 @@
   color: var(--gray-500);
   font-style: italic;
 }
+
 .btn.primary:hover {
   background-color: var(--primary-dark) !important; /* Force darker blue on hover */
 }
+
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-secondary);
@@ -119,6 +123,13 @@ body.dark-mode {
   flex-direction: column;
   border-right: 1px solid var(--gray-200);
   z-index: 10;
+  transition: width var(--transition), transform var(--transition);
+}
+
+.sidebar.collapsed {
+  width: 0;
+  transform: translateX(-100%);
+  overflow: hidden;
 }
 
 .content {
@@ -127,6 +138,37 @@ body.dark-mode {
   padding: 2rem;
   display: flex;
   flex-direction: column;
+  transition: margin-left var(--transition);
+}
+
+.sidebar.collapsed + .content {
+  margin-left: 0;
+}
+
+/* Menu Button */
+.menu-btn {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  z-index: 1001;
+  transition: all var(--transition);
+}
+
+.menu-btn:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow);
 }
 
 /* Sidebar Styles */
@@ -262,6 +304,10 @@ body.dark-mode {
   border: none;
 }
 
+.btn.icon-btn {
+  padding: 0.5rem;
+}
+
 .btn.primary {
   background-color: var(--primary);
   color: white;
@@ -370,6 +416,7 @@ textarea:focus {
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
 }
+
 /* About Section */
 .about-section {
   background-color: var(--bg-primary);
@@ -413,47 +460,6 @@ textarea:focus {
   margin-bottom: 0.5rem;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .output-panel {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .app-container {
-    flex-direction: column;
-  }
-  
-  .sidebar {
-    width: 100%;
-    flex-direction: row;
-    padding: 1rem;
-    align-items: center;
-    height: auto;
-  }
-  
-  .logo {
-    padding-bottom: 0;
-    margin-bottom: 0;
-    border-bottom: none;
-    margin-right: 1rem;
-  }
-  
-  .nav-menu {
-    flex-direction: row;
-    margin-bottom: 0;
-  }
-  
-  .theme-toggle {
-    margin-top: 0;
-    margin-left: auto;
-  }
-  
-  .content {
-    padding: 1rem;
-  }
-}
 /* Contact Section */
 .contact-section {
   background-color: var(--bg-primary);
@@ -537,41 +543,7 @@ textarea:focus {
   align-self: flex-start;
 }
 
-/* For very small screens */
-@media (max-width: 480px) {
-  .sidebar {
-    padding: 0.75rem;
-  }
-  
-  .nav-item span, 
-  .theme-toggle span,
-  .logo-text {
-    display: none;
-  }
-  
-  .logo {
-    margin-right: 0.5rem;
-  }
-  
-  .controls {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .btn span {
-    display: none;
-  }
-  
-  .btn {
-    padding: 0.75rem;
-  }
-}
-
-
-
-
-
-/* History Panel Styles */
+/* History Panel */
 .history-panel {
   position: fixed;
   top: 0;
@@ -639,7 +611,7 @@ textarea:focus {
   word-break: break-word;
 }
 
-.delete-history {
+.delete-btn {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
@@ -656,16 +628,6 @@ textarea:focus {
   padding: 2rem;
 }
 
-/* Dark Mode History Panel */
-.dark-mode .history-panel {
-  background: var(--gray-900);
-  border-left: 1px solid var(--gray-800);
-}
-
-.dark-mode .history-item {
-  background: var(--gray-800);
-}
-
 #clearHistoryButton {
   width: 4rem;
   height: 3rem;
@@ -680,9 +642,228 @@ textarea:focus {
   cursor: pointer;
   transition: background-color var(--transition), transform var(--transition);
 }
+
 #clearHistoryButton:hover {
   background-color: var(--danger);
   transform: translateY(-2px);
   box-shadow: var(--shadow);
+}
+
+/* Dark Mode History Panel */
+.dark-mode .history-panel {
+  background: var(--gray-900);
+  border-left: 1px solid var(--gray-800);
+}
+
+.dark-mode .history-item {
+  background: var(--gray-800);
+}
+
+/* Additional Animation Styling */
+.animation-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.animation-placeholder {
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--gray-200);
+  color: var(--text-primary);
+  font-size: 4rem;
+  border-radius: var(--border-radius);
+}
+
+.video-name {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.isl-word {
+  display: inline-block;
+  margin: 0 0.25rem;
+}
+
+.isl-word.time {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.isl-word.question {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.isl-word.negation {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.sentence-divider {
+  margin: 0 0.5rem;
+  color: var(--gray-500);
+}
+
+/* Recording Button State */
+.btn.recording {
+  background-color: var(--danger) !important;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 71, 111, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 71, 111, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 71, 111, 0);
+  }
+}
+
+.error {
+  color: var(--danger);
+  padding: 1rem;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .output-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    position: fixed;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    z-index: 1000;
+  }
+  
+  .content {
+    width: 100%;
+    margin-left: 0;
+  }
+  
+  .menu-btn {
+    top: 0.5rem;
+    left: 0.5rem;
+  }
+  
+  .history-panel {
+    width: 100%;
+    right: -100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn span {
+    display: none;
+  }
+  
+  .btn {
+    padding: 0.75rem;
+  }
+  
+  .panel-header h2 {
+    font-size: 1rem;
+  }
+  
+  .content {
+    padding: 1rem;
+  }
+  
+  .content-header h1 {
+    font-size: 1.25rem;
+  }
+  
+  .subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+
+/* Add these styles to your existing styles.css file */
+
+.animation-container {
+  width: 100%;
+  height: 300px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dark-mode .animation-container {
+  background-color: #2a2a2a;
+}
+
+.animation-container canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.placeholder-animation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+}
+
+.placeholder-animation i {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Animation controls - optional */
+.animation-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.animation-controls button {
+  padding: 5px 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: #f8f8f8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.animation-controls button:hover {
+  background-color: #e8e8e8;
+}
+
+.dark-mode .animation-controls button {
+  border-color: #444;
+  background-color: #333;
+  color: #fff;
+}
+
+.dark-mode .animation-controls button:hover {
+  background-color: #444;
 }
 

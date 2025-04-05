@@ -12,8 +12,23 @@
   <div class="app-container">
     <div class="sidebar">
       <div class="logo">
-        <span class="logo-icon"></span>
-        <span class="logo-text">ISL Translator</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" class="logo-img">
+          <!-- Background Shape -->
+          <rect x="5" y="5" width="40" height="40" rx="8" fill="#4361ee" />
+          
+          <!-- Hand Symbol -->
+          <path d="M25 12 L25 32 Q25 38, 20 38 T15 32 L15 20 Q15 14, 20 14 T25 20" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M35 12 L35 32 Q35 38, 30 38 T25 32 L25 20" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          
+          <!-- Sound Waves -->
+          <path d="M45 18 Q50 18, 50 25 Q50 32, 45 32" stroke="#4cc9f0" stroke-width="2" fill="none" stroke-linecap="round" />
+          <path d="M50 15 Q58 15, 58 25 Q58 35, 50 35" stroke="#4cc9f0" stroke-width="2" fill="none" stroke-linecap="round" />
+          <path d="M55 12 Q65 12, 65 25 Q65 38, 55 38" stroke="#4cc9f0" stroke-width="2" fill="none" stroke-linecap="round" />
+          
+          <!-- Text -->
+          <text x="70" y="22" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#4361ee">ISL</text>
+          <text x="70" y="36" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="#6c757d">Translator</text>
+        </svg>
       </div>
       <nav class="nav-menu">
         <a href="{{ url_for('index') }}" class="nav-item">

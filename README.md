@@ -11,6 +11,7 @@ This project aims to **convert spoken language into Indian Sign Language (ISL) u
 
 ## 🏗️ Tech Stack  
 - **Python** – For speech processing and NLP  
-- **Blender** – For 3D avatar animation  
+- **Blender** – For 3D avatar creation
+- **three.js** - For 3D rendering 
 - **spaCy/NLTK** – For ISL grammar extraction  
 - **HTML,CSS,Javascript,Flask** – For GUI interface  

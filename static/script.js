@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     animationContainer.innerHTML = '';
     state.scene = new THREE.Scene();
     // Set background color (you can adjust as needed)
-    state.scene.background = new THREE.Color(0x121212);
+    state.scene.background = new THREE.Color(0xffffff);
     
     state.camera = new THREE.PerspectiveCamera(
       30,

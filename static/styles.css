@@ -847,7 +847,7 @@ textarea:focus {
 /* Modern output panel with glass morphism */
 .output-panel {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
   margin-top: 1rem;
 }
@@ -1098,4 +1098,103 @@ input:focus {
   border-color: var(--primary-light);
   box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
   outline: none;
+}
+
+.animation-controls {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.animation-controls label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #495057;
+  font-weight: 500;
+}
+
+.animation-controls #speedValue {
+  font-weight: 600;
+  color: #4361ee;
+  min-width: 40px;
+  text-align: right;
+}
+
+.animation-controls input[type="range"] {
+  width: 100%;
+  height: 5px;
+  -webkit-appearance: none;
+  background: #e9ecef;
+  border-radius: 10px;
+  outline: none;
+  transition: background 0.2s;
+}
+
+.animation-controls input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4361ee;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.animation-controls input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #4361ee;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.animation-controls input[type="range"]::-webkit-slider-thumb:hover {
+  background: #3a56d4;
+  transform: scale(1.1);
+}
+
+.animation-controls input[type="range"]::-moz-range-thumb:hover {
+  background: #3a56d4;
+  transform: scale(1.1);
+}
+
+.animation-controls input[type="range"]:focus {
+  background: #dee2e6;
+}
+/* Dark mode styling for animation controls */
+.dark-mode .animation-controls {
+  background-color: var(--gray-800);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .animation-controls label {
+  color: var(--gray-300);
+}
+
+.dark-mode .animation-controls #speedValue {
+  color: var(--primary-light);
+}
+
+.dark-mode .animation-controls input[type="range"] {
+  background: var(--gray-700);
+}
+
+.dark-mode .animation-controls input[type="range"]::-webkit-slider-thumb {
+  background: var(--primary-light);
+}
+
+.dark-mode .animation-controls input[type="range"]::-moz-range-thumb {
+  background: var(--primary-light);
 }

@@ -1,4 +1,3 @@
-
 // Import Three.js, GLTFLoader, and defaultPose via the import map
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -12,12 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const processedTextField = document.getElementById('processed-text');
   const animationContainer = document.getElementById('animationContainer');
   const historyPanel = document.getElementById('history-panel');
+  const speedSlider = document.getElementById('speedSlider');
+  const speedValue = document.getElementById('speedValue');
 
   // Global state for the animation system
   const state = {
     text: '',
     bot: 'ybot',
     speed: 0.1,
+    baseSpeed: 0.1, // Base speed value that will be modified by the slider
+    speedMultiplier: 1.0, // Multiplier controlled by the slider
     pause: 800,
     listening: false,
     animations: [],
@@ -50,6 +53,22 @@ document.addEventListener('DOMContentLoaded', () => {
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = "en-US";
+
+  // -------------------------
+  // Speed Slider Handler
+  // -------------------------
+  if (speedSlider) {
+    // Initialize with the current value
+    speedValue.textContent = `${speedSlider.value}x`;
+    
+    // Update state when slider is moved
+    speedSlider.addEventListener('input', () => {
+      const multiplier = parseFloat(speedSlider.value);
+      state.speedMultiplier = multiplier;
+      state.speed = state.baseSpeed * multiplier;
+      speedValue.textContent = `${multiplier.toFixed(1)}x`;
+    });
+  }
 
   // -------------------------
   // Speech Recognition Methods
@@ -102,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
           this.flag = false;
           this.animations.shift();
-        }, this.pause);
+        }, this.pause / this.speedMultiplier); // Adjust pause time based on speed multiplier
       }
     }
   };
@@ -116,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         state.textTimer = false;
         state.animations.shift();
-      }, 100);
+      }, 100 / state.speedMultiplier); // Adjust text timing based on speed multiplier
     }
   }
 
@@ -190,16 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // -------------------------
   // Module Loading Helpers
   // -------------------------
-  // function getAnimationFunction(moduleObj, key) {
-  //   if (moduleObj.default && typeof moduleObj.default === 'function') {
-  //     return moduleObj.default;
-  //   } else if (moduleObj[key] && typeof moduleObj[key] === 'function') {
-  //     return moduleObj[key];
-  //   } else if (typeof moduleObj === 'function') {
-  //     return moduleObj;
-  //   }
-  //   return null;
-  // }
   function getAnimationFunction(moduleObj, key) {
     // First try named export (like export const Zero)
     if (moduleObj[key] && typeof moduleObj[key] === 'function') {

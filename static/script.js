@@ -835,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
     animationContainer.appendChild(state.renderer.domElement);
   
     // Lighting setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xfffff, 0.8);
     state.scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(0, 3, 3);

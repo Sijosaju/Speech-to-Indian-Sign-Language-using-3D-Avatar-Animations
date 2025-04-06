@@ -1,3 +1,4 @@
+
 // Import Three.js, GLTFLoader, and defaultPose via the import map
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -8,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const micButton = document.getElementById('micButton');
   const transcriptField = document.getElementById('transcript');
   const islBox = document.getElementById('islBox');
-  const processedTextField = document.getElementById('processed-text'); // new field for processed text
+  const processedTextField = document.getElementById('processed-text');
   const animationContainer = document.getElementById('animationContainer');
   const historyPanel = document.getElementById('history-panel');
 
@@ -30,7 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     characters: [],
     alphabetModules: {},
     wordModules: {},
-    wordList: []
+    numberModules: {}, // Stores number animations
+    wordList: [],
+    numberList: ['0','1','2','3','4','5','6','7','8','9'] // All supported numbers
   };
 
   let recognition;
@@ -107,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function addTextStep(animCommand) {
     if (!state.textTimer) {
       if (processedTextField) {
-        // Append the new letter or text fragment from the animation command
         processedTextField.textContent += animCommand[1];
       }
       state.textTimer = true;
@@ -140,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // -------------------------
+// -------------------------
   // History Management
   // -------------------------
   const saveToHistory = (originalText, islText) => {
@@ -188,13 +190,30 @@ document.addEventListener('DOMContentLoaded', () => {
   // -------------------------
   // Module Loading Helpers
   // -------------------------
+  // function getAnimationFunction(moduleObj, key) {
+  //   if (moduleObj.default && typeof moduleObj.default === 'function') {
+  //     return moduleObj.default;
+  //   } else if (moduleObj[key] && typeof moduleObj[key] === 'function') {
+  //     return moduleObj[key];
+  //   } else if (typeof moduleObj === 'function') {
+  //     return moduleObj;
+  //   }
+  //   return null;
+  // }
   function getAnimationFunction(moduleObj, key) {
+    // First try named export (like export const Zero)
+    if (moduleObj[key] && typeof moduleObj[key] === 'function') {
+      return moduleObj[key];
+    }
+    // Then try default export
     if (moduleObj.default && typeof moduleObj.default === 'function') {
       return moduleObj.default;
-    } else if (moduleObj[key] && typeof moduleObj[key] === 'function') {
-      return moduleObj[key];
-    } else if (moduleObj.animate && typeof moduleObj.animate === 'function') {
-      return moduleObj.animate;
+    }
+    // Fallback: look for any exported function
+    for (const exportName in moduleObj) {
+      if (typeof moduleObj[exportName] === 'function') {
+        return moduleObj[exportName];
+      }
     }
     return null;
   }
@@ -203,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const alphabetChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     for (const char of alphabetChars) {
       try {
-        const moduleObj = await import(`/static/Animations/alphabets/${char}.js`);
+        const moduleObj = await import(`./Animations/alphabets/${char}.js`);
         const animationFunction = getAnimationFunction(moduleObj, char);
         if (animationFunction) {
           state.alphabetModules[char] = animationFunction;
@@ -220,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const commonWords = ['HOME', 'TIME', 'YOU', 'PERSON'];
     for (const word of commonWords) {
       try {
-        const moduleObj = await import(`/static/Animations/words/${word.toLowerCase()}.js`);
+        const moduleObj = await import(`./Animations/words/${word.toLowerCase()}.js`);
         const animationFunction = getAnimationFunction(moduleObj, word);
         if (animationFunction) {
           state.wordModules[word] = animationFunction;
@@ -234,13 +253,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  const loadNumberModules = async () => {
+    const numbers = '0123456789';
+    for (const num of numbers) {
+      try {
+        const moduleObj = await import(`./Animations/numbers/${num}.js`);
+        const animationFunction = getAnimationFunction(moduleObj, num);
+        if (animationFunction) {
+          state.numberModules[num] = animationFunction;
+          console.log(`Successfully loaded animation for number: ${num}`);
+        } else {
+          console.warn(`Animation for number ${num} is not a function.`, moduleObj);
+        }
+      } catch (error) {
+        console.error(`Failed to load animation for number ${num}:`, error);
+      }
+    }
+  };
+
   // -------------------------
   // Three.js Initialization
   // -------------------------
   function initThree() {
     animationContainer.innerHTML = '';
     state.scene = new THREE.Scene();
-    // Set background color (you can adjust as needed)
     state.scene.background = new THREE.Color(0xffffff);
     
     state.camera = new THREE.PerspectiveCamera(
@@ -318,31 +354,57 @@ document.addEventListener('DOMContentLoaded', () => {
   // -------------------------
   function processAnimation(text) {
     if (!text) return;
-    const words = text.toUpperCase().split(' ').filter(w => w.trim() !== '');
+    
+    // Convert number words to digits and preserve existing digits
+    const processedText = text.toUpperCase()
+      .replace(/ZERO/gi, '0')
+      .replace(/ONE/gi, '1')
+      .replace(/TWO/gi, '2')
+      .replace(/THREE/gi, '3')
+      .replace(/FOUR/gi, '4')
+      .replace(/FIVE/gi, '5')
+      .replace(/SIX/gi, '6')
+      .replace(/SEVEN/gi, '7')
+      .replace(/EIGHT/gi, '8')
+      .replace(/NINE/gi, '9');
+    
+    const words = processedText.split(/(\d+|\s+)/).filter(w => w.trim() !== '');
+    
     state.animations = [];
     state.characters = [];
-    // Clear previous processed text
+    
     if (processedTextField) {
       processedTextField.textContent = '';
     }
 
     words.forEach(word => {
-      console.log(`Processing word: ${word}`);
-      if (state.wordList.includes(word)) {
+      // Check if this is a number (digits)
+      if (/^\d+$/.test(word)) {
+        console.log(`Processing number: ${word}`);
+        // Process as individual digits (e.g., "123" -> "1", "2", "3")
+        [...word].forEach(digit => {
+          state.animations.push(['add-text', digit]);
+          if (state.numberModules[digit]) {
+            state.numberModules[digit](state);
+          } else {
+            console.error(`No animation for digit: ${digit}`);
+          }
+        });
+        state.animations.push(['add-text', ' ']); // Add space after number
+      }
+      // Existing word processing
+      else if (state.wordList.includes(word)) {
         state.animations.push(['add-text', `${word} `]);
-        if (state.wordModules[word] && typeof state.wordModules[word] === 'function') {
-          state.wordModules[word](state);
-        } else {
-          console.warn(`No valid module function for word: ${word}`);
-        }
-      } else {
+        state.wordModules[word](state);
+      } 
+      else {
         [...word].forEach((ch, i) => {
           const charText = (i === word.length - 1) ? `${ch} ` : ch;
           state.animations.push(['add-text', charText]);
-          if (state.alphabetModules[ch] && typeof state.alphabetModules[ch] === 'function') {
+          if (state.alphabetModules[ch]) {
             state.alphabetModules[ch](state);
           } else {
-            console.warn(`No valid module found for letter: ${ch}`);
+            console.warn(`No animation for character: ${ch}`);
           }
         });
       }
@@ -389,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getWordClass(word) {
-    if (/\d/.test(word)) return 'time';
+    if (/\d/.test(word)) return 'number';
     if (["what", "why", "how", "when", "where"].includes(word.toLowerCase())) return 'question';
     if (["not", "no"].includes(word.toLowerCase())) return 'negation';
     return '';
@@ -481,7 +543,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let interimTranscript = '';
     let finalTranscript = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
-      const text = event.results[i][0].transcript;
+      let text = event.results[i][0].transcript;
+      
+      // Convert number words to digits
+      text = text
+        .replace(/zero/gi, '0')
+        .replace(/one/gi, '1')
+        .replace(/two/gi, '2')
+        .replace(/three/gi, '3')
+        .replace(/four/gi, '4')
+        .replace(/five/gi, '5')
+        .replace(/six/gi, '6')
+        .replace(/seven/gi, '7')
+        .replace(/eight/gi, '8')
+        .replace(/nine/gi, '9');
+      
       event.results[i].isFinal ? finalTranscript += text : interimTranscript += text;
     }
     transcriptField.value = finalTranscript + interimTranscript;
@@ -505,6 +581,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!initThree()) throw new Error("Three.js initialization failed");
       await loadAlphabetModules();
       await loadWordModules();
+      await loadNumberModules(); // Load number animations
+      console.log("Loaded number modules:", Object.keys(state.numberModules));
       await loadModel(`/static/Models/${state.bot}/${state.bot}.glb`);
       window.addEventListener('resize', () => {
         if (state.camera && state.renderer) {
@@ -536,5 +614,3 @@ document.addEventListener('DOMContentLoaded', () => {
   // Start the application
   initApp();
 });
-
-

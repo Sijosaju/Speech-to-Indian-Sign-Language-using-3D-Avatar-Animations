@@ -34,12 +34,64 @@
   --transition: 0.3s ease;
   --sidebar-width: 240px;
 }
-
-.btn.primary {
-  background-color: var(--primary) !important; /* Force blue color */
-  color: white !important; /* Force white text */
+/* Modern Tab Switching Styles */
+/* Tab Switching Styles */
+.input-tabs {
+  display: flex;
+  position: relative;
+  margin-bottom: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 4px;
 }
 
+.dark-mode .input-tabs {
+  background-color: #2d3748;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #6c757d;
+  font-weight: 500;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  color: #4361ee;
+  font-weight: 600;
+}
+
+.dark-mode .tab-button {
+  color: #a0aec0;
+}
+
+.dark-mode .tab-button.active {
+  color: #63b3ed;
+}
+
+.tab-indicator {
+  position: absolute;
+  height: calc(100% - 8px);
+  background-color: white;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .tab-indicator {
+  background-color: #4a5568;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
 /* ISL Grammar Textbox */
 #islBox {
   background-color: var(--bg-secondary);
@@ -1174,27 +1226,102 @@ input:focus {
   background: #dee2e6;
 }
 /* Dark mode styling for animation controls */
+/* Animation Controls - Enhanced */
 .dark-mode .animation-controls {
-  background-color: var(--gray-800);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: #1f2937; /* Slightly lighter than gray-800 for better depth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Stronger shadow for better elevation */
+  border-radius: 8px; /* Rounded corners */
+  padding: 12px 16px; /* More comfortable padding */
+  border: 1px solid rgba(255, 255, 255, 0.05); /* Subtle border */
 }
 
 .dark-mode .animation-controls label {
-  color: var(--gray-300);
+  color: #e5e7eb; /* Brighter text for better readability */
+  font-weight: 500; /* Slightly bolder text */
+  margin-bottom: 6px; /* Better spacing */
+  display: block; /* Ensure labels stack properly */
 }
 
 .dark-mode .animation-controls #speedValue {
-  color: var(--primary-light);
+  color: #60a5fa; /* Brighter primary color */
+  font-weight: 600; /* Make value more prominent */
 }
 
 .dark-mode .animation-controls input[type="range"] {
-  background: var(--gray-700);
+  background: #374151; /* Slightly lighter track for better visibility */
+  border-radius: 4px; /* Rounded track */
+  height: 6px; /* Thicker track */
+  margin: 10px 0; /* Better vertical spacing */
 }
 
 .dark-mode .animation-controls input[type="range"]::-webkit-slider-thumb {
-  background: var(--primary-light);
+  background: #60a5fa; /* Match the value color */
+  width: 16px; /* Larger thumb */
+  height: 16px; /* Larger thumb */
+  border-radius: 50%; /* Perfectly round */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* Add shadow to thumb */
+  border: 2px solid rgba(255, 255, 255, 0.2); /* Subtle border */
 }
 
 .dark-mode .animation-controls input[type="range"]::-moz-range-thumb {
-  background: var(--primary-light);
+  background: #60a5fa; /* Match the value color */
+  width: 16px; /* Larger thumb */
+  height: 16px; /* Larger thumb */
+  border-radius: 50%; /* Perfectly round */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); /* Add shadow to thumb */
+  border: 2px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+}
+
+.dark-mode .animation-controls input[type="range"]:focus {
+  outline: none; /* Remove default focus outline */
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.4); /* Custom focus glow */
+}
+
+/* Grammar Section - Enhanced */
+.dark-mode .grammar-section {
+  background-color: rgba(17, 24, 39, 0.85); /* Darker, slightly more transparent */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Slightly more visible border */
+  border-radius: 8px; /* Rounded corners */
+  padding: 16px; /* Comfortable padding */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  margin: 12px 0; /* Consistent spacing */
+}
+
+/* Button styles for dark mode */
+.dark-mode button {
+  background-color: #2d3748; /* Dark but not too dark */
+  color: #e5e7eb; /* Light text */
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Subtle border */
+  border-radius: 6px; /* Rounded corners */
+  padding: 8px 12px; /* Comfortable padding */
+  transition: all 0.2s ease; /* Smooth transitions */
+}
+
+.dark-mode button:hover {
+  background-color: #374151; /* Slightly lighter on hover */
+  border-color: rgba(255, 255, 255, 0.15); /* More visible border on hover */
+}
+
+.dark-mode button:active {
+  background-color: #4b5563; /* Even lighter when active */
+  transform: translateY(1px); /* Subtle press effect */
+}
+
+/* Custom scrollbar for dark mode */
+.dark-mode ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }

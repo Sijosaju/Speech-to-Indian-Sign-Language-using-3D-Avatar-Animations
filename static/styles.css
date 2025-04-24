@@ -932,21 +932,23 @@ textarea:focus {
 /* Modern result boxes */
 .result-box {
   background-color: var(--bg-secondary);
-  border: none;
-  border-radius: 12px;
-  padding: 1rem;
-  min-height: 100px;
+  min-height: 120px;
   font-size: 1rem;
   color: var(--text-primary);
-  margin-bottom: 1.25rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  font-family: Inter, sans-serif;
+  line-height: 1.6;
+  overflow-y: auto;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 4px inset;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  transition: all var(--transition);
 }
 
-.result-box:hover {
+/*.result-box:hover {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
-
+*/
 /* Style for the processed text section */
 .processed-text-section {
   margin-top: 1.25rem;

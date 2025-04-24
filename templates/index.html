@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Speech to ISL Translator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <!-- Add link to our new CSS file -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='tab-switching.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
   <!-- Import map to load Three.js directly from jsDelivr -->
@@ -60,23 +62,40 @@
       <div class="theme-toggle">
         <i data-feather="moon"></i>
         <span>Dark Mode</span>
+        <div class="toggle-switch"></div>
       </div>
     </div>
 
     <main class="content">
       <header class="content-header">
         <h1>Speech to Indian Sign Language Translator</h1>
-        <p class="subtitle">Translate spoken language to ISL in real-time</p>
+        <p class="subtitle">Translate spoken or typed language to ISL in real-time</p>
       </header>
 
       <div class="workspace">
         <div class="input-panel">
+          <div class="input-tabs">
+            <button class="tab-button active" data-tab="voice">
+              <i data-feather="mic"></i>
+              <span>Voice Input</span>
+            </button>
+            <button class="tab-button" data-tab="text">
+              <i data-feather="type"></i>
+              <span>Text Input</span>
+            </button>
+            <!-- This is the new tab indicator -->
+            <div class="tab-indicator"></div>
+          </div>
           <div class="panel-header">
-            <h2>Speech Input</h2>
+            <!-- <h2 id="input-title">Speech Input</h2> -->
             <div class="controls">
               <button id="micButton" class="btn primary">
                 <i data-feather="mic"></i>
                 <span>Start Recording</span>
+              </button>
+              <button id="textSubmitButton" class="btn primary" style="display: none;">
+                <i data-feather="send"></i>
+                <span>Translate</span>
               </button>
               <button id="clearButton" class="btn secondary">
                 <i data-feather="trash-2"></i>
@@ -85,6 +104,7 @@
             </div>
           </div>
           <div class="transcript-container">
+            <textarea id="textInput" placeholder="Type your text here..." style="display: none;"></textarea>
             <textarea id="transcript" readonly placeholder="Your transcribed text will appear here..."></textarea>
           </div>
         </div>
@@ -135,5 +155,7 @@
   </div>
 
   <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
+  <!-- Add link to our new JavaScript file -->
+  <script src="{{ url_for('static', filename='tab-switching.js') }}"></script>
 </body>
 </html>

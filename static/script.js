@@ -4,8 +4,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { defaultPose } from './Animations/defaultPose.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Element selectors
+  // Element selectors - ADDED NEW SELECTORS
   const micButton = document.getElementById('micButton');
+  const textSubmitButton = document.getElementById('textSubmitButton');
+  const textInput = document.getElementById('textInput');
   const transcriptField = document.getElementById('transcript');
   const islBox = document.getElementById('islBox');
   const processedTextField = document.getElementById('processed-text');
@@ -13,14 +15,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const historyPanel = document.getElementById('history-panel');
   const speedSlider = document.getElementById('speedSlider');
   const speedValue = document.getElementById('speedValue');
+  const inputTitle = document.getElementById('input-title');
+  const tabButtons = document.querySelectorAll('.tab-button');
 
   // Global state for the animation system
   const state = {
     text: '',
     bot: 'ybot',
     speed: 0.1,
-    baseSpeed: 0.1, // Base speed value that will be modified by the slider
-    speedMultiplier: 1.0, // Multiplier controlled by the slider
+    baseSpeed: 0.1,
+    speedMultiplier: 1.0,
     pause: 800,
     listening: false,
     animations: [],
@@ -34,9 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
     characters: [],
     alphabetModules: {},
     wordModules: {},
-    numberModules: {}, // Stores number animations
+    numberModules: {},
     wordList: [],
-    numberList: ['0','1','2','3','4','5','6','7','8','9'] // All supported numbers
+    numberList: ['0','1','2','3','4','5','6','7','8','9'],
+    currentInputMode: 'voice' // NEW: Track current input mode
   };
 
   let recognition;
@@ -44,24 +49,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize Speech Recognition
   if (!('webkitSpeechRecognition' in window)) {
-    alert("Speech recognition not supported in this browser!");
+    console.warn("Speech recognition not supported in this browser!");
     micButton.disabled = true;
-    return;
+    // Fall back to text input if voice not supported
+    switchToTextInput();
+  } else {
+    recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
   }
 
-  recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = "en-US";
+  // -------------------------
+  // NEW: Tab Switching Functionality
+  // -------------------------
+  function switchToVoiceInput() {
+    state.currentInputMode = 'voice';
+    textInput.style.display = 'none';
+    transcriptField.style.display = 'block';
+    micButton.style.display = 'flex';
+    textSubmitButton.style.display = 'none';
+    inputTitle.textContent = 'Speech Input';
+    // Clear any existing text
+    textInput.value = '';
+  }
+
+  function switchToTextInput() {
+    state.currentInputMode = 'text';
+    textInput.style.display = 'block';
+    transcriptField.style.display = 'none';
+    micButton.style.display = 'none';
+    textSubmitButton.style.display = 'flex';
+    inputTitle.textContent = 'Text Input';
+    // Stop recording if active
+    if (isRecording) {
+      stopRecording();
+    }
+  }
+
+  // Set up tab event listeners
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      
+      if (button.dataset.tab === 'voice') {
+        switchToVoiceInput();
+      } else {
+        switchToTextInput();
+      }
+    });
+  });
+
+  // -------------------------
+  // NEW: Text Input Handling
+  // -------------------------
+  function handleTextSubmit() {
+    const text = textInput.value.trim();
+    if (text) {
+      // Display the text in the transcript field (optional)
+      transcriptField.value = text;
+      // Process the text (same as voice input)
+      sendTextForProcessing(text);
+    } else {
+      alert('Please enter some text to translate');
+    }
+  }
+
+  textSubmitButton.addEventListener('click', handleTextSubmit);
+
+  // Optional: Submit on Ctrl/Cmd + Enter
+  textInput.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      handleTextSubmit();
+    }
+  });
 
   // -------------------------
   // Speed Slider Handler
   // -------------------------
   if (speedSlider) {
-    // Initialize with the current value
     speedValue.textContent = `${speedSlider.value}x`;
     
-    // Update state when slider is moved
     speedSlider.addEventListener('input', () => {
       const multiplier = parseFloat(speedSlider.value);
       state.speedMultiplier = multiplier;
@@ -74,6 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Speech Recognition Methods
   // -------------------------
   const startRecording = () => {
+    if (state.currentInputMode !== 'voice') return;
+    
     console.log("Starting speech recognition");
     recognition.start();
     isRecording = true;
@@ -99,12 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     this.renderer.render(this.scene, this.camera);
 
-    // No avatar or animations available
     if (!this.avatar || this.animations.length === 0) return;
 
     const currentAnim = this.animations[0];
 
-    // Process text animation commands
     if (currentAnim && currentAnim.length) {
       if (!this.flag) {
         if (currentAnim[0] === 'add-text') {
@@ -115,13 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } else {
-      // No steps left; add a pause before shifting animations
       if (!this.flag) {
         this.flag = true;
         setTimeout(() => {
           this.flag = false;
           this.animations.shift();
-        }, this.pause / this.speedMultiplier); // Adjust pause time based on speed multiplier
+        }, this.pause / this.speedMultiplier);
       }
     }
   };
@@ -135,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         state.textTimer = false;
         state.animations.shift();
-      }, 100 / state.speedMultiplier); // Adjust text timing based on speed multiplier
+      }, 100 / state.speedMultiplier);
     }
   }
 
@@ -151,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
           bone[action][axis] = Math.max(bone[action][axis] - ctx.speed, limit);
           i++;
         } else {
-          // Remove completed step
           animSteps.splice(i, 1);
         }
       } else {
@@ -161,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-// -------------------------
+  // -------------------------
   // History Management
   // -------------------------
   const saveToHistory = (originalText, islText) => {
@@ -210,19 +277,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Module Loading Helpers
   // -------------------------
   function getAnimationFunction(moduleObj, key) {
-    // First try named export (like export const Zero)
-    if (moduleObj[key] && typeof moduleObj[key] === 'function') {
-      return moduleObj[key];
-    }
-    // Then try default export
-    if (moduleObj.default && typeof moduleObj.default === 'function') {
-      return moduleObj.default;
-    }
-    // Fallback: look for any exported function
+    if (moduleObj[key] && typeof moduleObj[key] === 'function') return moduleObj[key];
+    if (moduleObj.default && typeof moduleObj.default === 'function') return moduleObj.default;
     for (const exportName in moduleObj) {
-      if (typeof moduleObj[exportName] === 'function') {
-        return moduleObj[exportName];
-      }
+      if (typeof moduleObj[exportName] === 'function') return moduleObj[exportName];
     }
     return null;
   }
@@ -233,19 +291,15 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const moduleObj = await import(`./Animations/alphabets/${char}.js`);
         const animationFunction = getAnimationFunction(moduleObj, char);
-        if (animationFunction) {
-          state.alphabetModules[char] = animationFunction;
-        } else {
-          console.warn(`Animation for letter ${char} is not a function.`, moduleObj);
-        }
+        if (animationFunction) state.alphabetModules[char] = animationFunction;
       } catch (error) {
         console.warn(`Failed to load animation for letter ${char}:`, error);
       }
     }
   };
-
+// Add new Words
   const loadWordModules = async () => {
-    const commonWords = ['HOME', 'TIME', 'YOU', 'PERSON'];
+    const commonWords = ['HOME', 'TIME', 'YOU', 'PERSON','ARRIVE'];
     for (const word of commonWords) {
       try {
         const moduleObj = await import(`./Animations/words/${word.toLowerCase()}.js`);
@@ -253,8 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (animationFunction) {
           state.wordModules[word] = animationFunction;
           state.wordList.push(word);
-        } else {
-          console.warn(`Animation for word ${word} is not a function.`, moduleObj);
         }
       } catch (error) {
         console.warn(`Failed to load animation for word ${word}:`, error);
@@ -268,12 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const moduleObj = await import(`./Animations/numbers/${num}.js`);
         const animationFunction = getAnimationFunction(moduleObj, num);
-        if (animationFunction) {
-          state.numberModules[num] = animationFunction;
-          console.log(`Successfully loaded animation for number: ${num}`);
-        } else {
-          console.warn(`Animation for number ${num} is not a function.`, moduleObj);
-        }
+        if (animationFunction) state.numberModules[num] = animationFunction;
       } catch (error) {
         console.error(`Failed to load animation for number ${num}:`, error);
       }
@@ -304,7 +351,6 @@ document.addEventListener('DOMContentLoaded', () => {
     state.renderer.setSize(animationContainer.clientWidth, animationContainer.clientHeight);
     animationContainer.appendChild(state.renderer.domElement);
   
-    // Lighting setup
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     state.scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -340,21 +386,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 defaultPose(state);
                 resolve();
               } catch (error) {
-                console.error("Error applying default pose:", error);
                 reject(error);
               }
             },
-            (xhr) => console.log(`${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded`),
-            (error) => {
-              console.error('Error loading model:', error);
-              reject(error);
-            }
+            undefined,
+            (error) => reject(error)
           );
         })
-        .catch(error => {
-          console.error(error);
-          reject(error);
-        });
+        .catch(error => reject(error));
     });
   }
   
@@ -364,7 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function processAnimation(text) {
     if (!text) return;
     
-    // Convert number words to digits and preserve existing digits
     const processedText = text.toUpperCase()
       .replace(/ZERO/gi, '0')
       .replace(/ONE/gi, '1')
@@ -382,26 +420,16 @@ document.addEventListener('DOMContentLoaded', () => {
     state.animations = [];
     state.characters = [];
     
-    if (processedTextField) {
-      processedTextField.textContent = '';
-    }
+    if (processedTextField) processedTextField.textContent = '';
 
     words.forEach(word => {
-      // Check if this is a number (digits)
       if (/^\d+$/.test(word)) {
-        console.log(`Processing number: ${word}`);
-        // Process as individual digits (e.g., "123" -> "1", "2", "3")
         [...word].forEach(digit => {
           state.animations.push(['add-text', digit]);
-          if (state.numberModules[digit]) {
-            state.numberModules[digit](state);
-          } else {
-            console.error(`No animation for digit: ${digit}`);
-          }
+          if (state.numberModules[digit]) state.numberModules[digit](state);
         });
-        state.animations.push(['add-text', ' ']); // Add space after number
+        state.animations.push(['add-text', ' ']);
       }
-      // Existing word processing
       else if (state.wordList.includes(word)) {
         state.animations.push(['add-text', `${word} `]);
         state.wordModules[word](state);
@@ -410,11 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         [...word].forEach((ch, i) => {
           const charText = (i === word.length - 1) ? `${ch} ` : ch;
           state.animations.push(['add-text', charText]);
-          if (state.alphabetModules[ch]) {
-            state.alphabetModules[ch](state);
-          } else {
-            console.warn(`No animation for character: ${ch}`);
-          }
+          if (state.alphabetModules[ch]) state.alphabetModules[ch](state);
         });
       }
     });
@@ -485,17 +509,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (confirm("Are you sure you want to delete this entry?")) {
         fetch(`/delete_history/${id}`, { method: "DELETE" })
           .then(response => response.json())
-          .then(data => {
-            if (data.error) {
-              alert(data.error);
-            } else {
-              displayHistory();
-            }
-          })
-          .catch(error => {
-            console.error("Delete error:", error);
-            alert("Could not delete entry.");
-          });
+          .then(data => data.error ? alert(data.error) : displayHistory())
+          .catch(error => console.error("Delete error:", error));
       }
     }
   });
@@ -504,17 +519,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (confirm("Are you sure you want to clear all conversion history?")) {
       fetch("/clear_history", { method: "DELETE" })
         .then(response => response.json())
-        .then(data => {
-          if (data.error) {
-            alert(data.error);
-          } else {
-            displayHistory();
-          }
-        })
-        .catch(error => {
-          console.error("Clear error:", error);
-          alert("Could not clear history.");
-        });
+        .then(data => data.error ? alert(data.error) : displayHistory())
+        .catch(error => console.error("Clear error:", error));
     }
   });
 
@@ -524,14 +530,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('clearButton').addEventListener('click', () => {
     transcriptField.value = '';
+    textInput.value = '';
     islBox.innerHTML = '';
     processedTextField.textContent = '';
     state.animations = [];
-    const placeholderDiv = document.createElement('div');
-    placeholderDiv.className = 'placeholder-animation';
-    placeholderDiv.innerHTML = '<i data-feather="video"></i><p>Animation will appear here</p>';
     if (!state.scene) {
       animationContainer.innerHTML = '';
+      const placeholderDiv = document.createElement('div');
+      placeholderDiv.className = 'placeholder-animation';
+      placeholderDiv.innerHTML = '<i data-feather="video"></i><p>Animation will appear here</p>';
       animationContainer.appendChild(placeholderDiv);
       feather.replace();
     }
@@ -540,47 +547,47 @@ document.addEventListener('DOMContentLoaded', () => {
   // -------------------------
   // Speech Recognition Event Handlers
   // -------------------------
-  recognition.onstart = () => {
-    console.log("Speech recognition started");
-    isRecording = true;
-    micButton.innerHTML = '<i data-feather="mic-off"></i> Stop Recording';
-    micButton.classList.add('recording');
-    feather.replace();
-  };
+  if (recognition) {
+    recognition.onstart = () => {
+      isRecording = true;
+      micButton.innerHTML = '<i data-feather="mic-off"></i> Stop Recording';
+      micButton.classList.add('recording');
+      feather.replace();
+    };
 
-  recognition.onresult = (event) => {
-    let interimTranscript = '';
-    let finalTranscript = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      let text = event.results[i][0].transcript;
-      
-      // Convert number words to digits
-      text = text
-        .replace(/zero/gi, '0')
-        .replace(/one/gi, '1')
-        .replace(/two/gi, '2')
-        .replace(/three/gi, '3')
-        .replace(/four/gi, '4')
-        .replace(/five/gi, '5')
-        .replace(/six/gi, '6')
-        .replace(/seven/gi, '7')
-        .replace(/eight/gi, '8')
-        .replace(/nine/gi, '9');
-      
-      event.results[i].isFinal ? finalTranscript += text : interimTranscript += text;
-    }
-    transcriptField.value = finalTranscript + interimTranscript;
-    if (finalTranscript) sendTextForProcessing(finalTranscript);
-  };
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        let text = event.results[i][0].transcript;
+        
+        text = text
+          .replace(/zero/gi, '0')
+          .replace(/one/gi, '1')
+          .replace(/two/gi, '2')
+          .replace(/three/gi, '3')
+          .replace(/four/gi, '4')
+          .replace(/five/gi, '5')
+          .replace(/six/gi, '6')
+          .replace(/seven/gi, '7')
+          .replace(/eight/gi, '8')
+          .replace(/nine/gi, '9');
+        
+        event.results[i].isFinal ? finalTranscript += text : interimTranscript += text;
+      }
+      transcriptField.value = finalTranscript + interimTranscript;
+      if (finalTranscript) sendTextForProcessing(finalTranscript);
+    };
 
-  recognition.onerror = (event) => {
-    console.error("Speech recognition error:", event.error);
-    stopRecording();
-  };
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      stopRecording();
+    };
 
-  recognition.onend = () => {
-    if (isRecording) recognition.start();
-  };
+    recognition.onend = () => {
+      if (isRecording) recognition.start();
+    };
+  }
 
   // -------------------------
   // Initialize 3D System and App
@@ -590,9 +597,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!initThree()) throw new Error("Three.js initialization failed");
       await loadAlphabetModules();
       await loadWordModules();
-      await loadNumberModules(); // Load number animations
-      console.log("Loaded number modules:", Object.keys(state.numberModules));
+      await loadNumberModules();
       await loadModel(`/static/Models/${state.bot}/${state.bot}.glb`);
+      
       window.addEventListener('resize', () => {
         if (state.camera && state.renderer) {
           state.camera.aspect = animationContainer.clientWidth / animationContainer.clientHeight;
@@ -600,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
           state.renderer.setSize(animationContainer.clientWidth, animationContainer.clientHeight);
         }
       });
-      console.log("3D animation system initialized successfully");
+      
       return true;
     } catch (error) {
       console.error('3D System initialization error:', error);
@@ -610,10 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function initApp() {
     feather.replace();
-    const threeJsInitialized = await init3DSystem();
-    if (!threeJsInitialized) {
-      console.warn("Falling back to video-based animations");
-    }
+    await init3DSystem();
     const themeToggle = document.querySelector('.theme-toggle');
     themeToggle.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');

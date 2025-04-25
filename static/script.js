@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 // Add new Words
   const loadWordModules = async () => {
-    const commonWords = ['HOME', 'TIME', 'YOU', 'PERSON','ARRIVE'];
+    const commonWords = ['HOME', 'TIME', 'YOU', 'PERSON'];
     for (const word of commonWords) {
       try {
         const moduleObj = await import(`./Animations/words/${word.toLowerCase()}.js`);

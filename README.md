@@ -4,7 +4,7 @@ This project is a web-based application that translates spoken English into Indi
 
 ## Key Features
 
-* **Speech Recognition:** Captures spoken English using the browser's SpeechRecognition API.
+* **Speech Recognition:** Captures spoken English using the browser's Web Speech API.
 * **Text Processing:** Preprocesses the input text, expands contractions, handles time formats, and removes unnecessary words to simplify ISL conversion.
 * **ISL Structure Extraction:** Extracts essential words and tense markers to form the ISL structure using spaCy.
 * **3D Avatar Animation:** Animates a 3D avatar to perform the corresponding ISL signs based on the extracted structure.
@@ -18,7 +18,7 @@ This project is a web-based application that translates spoken English into Indi
 
 * **Frontend:**
     * HTML, CSS, JavaScript
-    * Three.js (for 3D rendering)
+    * Three js (for 3D rendering)
     * GLTFLoader (for loading 3D models)
     * Fetch API (for client-server communication)
     * Feather Icons (for UI icons)

@@ -209,25 +209,6 @@ App will be available at **[http://localhost:8080](http://localhost:8080)**
 
 ---
 
-## ☁️ Cloud Deployment
-
-### Railway
-
-1. Sign in at [railway.app](https://railway.app) with GitHub
-2. Create a new project → Import this repository
-3. Railway auto-detects the `Dockerfile`
-4. Add the `MONGO_URI` environment variable in Railway's dashboard
-5. Deploy — Railway assigns a public URL automatically
-
-### Render
-
-1. Connect the repository on [render.com](https://render.com)
-2. The included `render.yaml` handles configuration
-3. Add `MONGO_URI` as an environment variable
-4. Deploy the Docker-based service
-
----
-
 ## 🗃️ MongoDB Atlas Setup
 
 1. Create a free cluster at [mongodb.com/atlas](https://mongodb.com/atlas)

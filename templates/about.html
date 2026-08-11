@@ -9,6 +9,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
 </head>
 <body>
+  <button id="menu-btn" class="menu-btn" aria-label="Toggle menu">
+    <i data-feather="menu"></i>
+  </button>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
   <div class="app-container">
     <div class="sidebar">
       <div class="logo">
@@ -75,6 +79,29 @@
       const themeToggle = document.querySelector('.theme-toggle');
       themeToggle.addEventListener('click', () => {
         document.body.classList.toggle('dark-mode');
+      });
+
+      // Mobile sidebar toggle
+      const menuBtn = document.getElementById('menu-btn');
+      const sidebar = document.querySelector('.sidebar');
+      const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+      const closeSidebar = () => {
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('show');
+      };
+
+      menuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        sidebarOverlay.classList.toggle('show');
+      });
+
+      sidebarOverlay.addEventListener('click', closeSidebar);
+
+      document.querySelectorAll('.nav-item').forEach((link) => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 768) closeSidebar();
+        });
       });
     });
   </script>

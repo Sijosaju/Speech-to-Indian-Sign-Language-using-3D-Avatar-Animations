@@ -615,8 +615,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // -------------------------
+  // Mobile Sidebar Toggle
+  // -------------------------
+  function initSidebarToggle() {
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    if (!menuBtn || !sidebar || !sidebarOverlay) return;
+
+    const closeSidebar = () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('show');
+    };
+
+    menuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('show');
+    });
+
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.querySelectorAll('.nav-item').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) closeSidebar();
+      });
+    });
+  }
+
   async function initApp() {
     feather.replace();
+    initSidebarToggle();
     await init3DSystem();
     const themeToggle = document.querySelector('.theme-toggle');
     themeToggle.addEventListener('click', () => {

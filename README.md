@@ -19,9 +19,9 @@
 
 ## 🌟 What Is This?
 
-Over **63 million people** in India are deaf or hard of hearing. Most digital content remains inaccessible to them. This project bridges that gap — it takes **spoken or typed English**, converts it into **ISL grammar structure**, and brings it to life through a **real-time animated 3D avatar** performing the corresponding signs.
+Over **63 million people** in India are members of the Deaf and hard-of-hearing community. Most digital content remains inaccessible to them. This project bridges that gap — it takes **spoken or typed English**, converts it into **ISL grammar structure**, and brings it to life through a **real-time animated 3D avatar** performing the corresponding signs.
 
-> Built as a final-year project to demonstrate the practical intersection of NLP, 3D animation, full-stack development, and accessibility technology.
+> Built as a mini project to demonstrate the practical intersection of NLP, 3D animation, full-stack development, and accessibility technology.
 
 ---
 

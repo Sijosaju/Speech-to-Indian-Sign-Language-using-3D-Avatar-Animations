@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sign-language-app
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: GUNICORN_THREADS
+        value: "2"

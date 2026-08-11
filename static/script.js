@@ -1,4 +1,4 @@
-// Import Three.js, GLTFLoader, and defaultPose via the import map
+﻿// Import Three.js, GLTFLoader, and defaultPose via the import map
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { defaultPose } from './Animations/defaultPose.js';
@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const alphabetChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     for (const char of alphabetChars) {
       try {
-        const moduleObj = await import(`./Animations/alphabets/${char}.js`);
+        const moduleObj = await import(`./Animations/Alphabets/${char}.js`);
         const animationFunction = getAnimationFunction(moduleObj, char);
         if (animationFunction) state.alphabetModules[char] = animationFunction;
       } catch (error) {
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const commonWords = ['HOME', 'TIME', 'YOU', 'PERSON'];
     for (const word of commonWords) {
       try {
-        const moduleObj = await import(`./Animations/words/${word.toLowerCase()}.js`);
+        const moduleObj = await import(`./Animations/Words/${word.toUpperCase()}.js`);
         const animationFunction = getAnimationFunction(moduleObj, word);
         if (animationFunction) {
           state.wordModules[word] = animationFunction;
@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const numbers = '0123456789';
     for (const num of numbers) {
       try {
-        const moduleObj = await import(`./Animations/numbers/${num}.js`);
+        const moduleObj = await import(`./Animations/Numbers/${num}.js`);
         const animationFunction = getAnimationFunction(moduleObj, num);
         if (animationFunction) state.numberModules[num] = animationFunction;
       } catch (error) {

@@ -1,12 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Speech to ISL Translator</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <!-- Add link to our new CSS file -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='tab-switching.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
   <!-- Import map to load Three.js directly from jsDelivr -->
@@ -155,7 +153,5 @@
   </div>
 
   <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
-  <!-- Add link to our new JavaScript file -->
-  <script src="{{ url_for('static', filename='tab-switching.js') }}"></script>
 </body>
 </html>

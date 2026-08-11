@@ -1,0 +1,11 @@
+.git
+.github
+.venv
+__pycache__
+*.pyc
+.env
+node_modules
+en_core_web_sm-3.4.0
+npm-debug.log
+.DS_Store
+.vscode
